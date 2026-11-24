@@ -1487,15 +1487,19 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
         </div>
       </div>
 
-            <div id="adminGeneratedTestsCard" style="background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 100%);border:1.5px solid #93c5fd;border-radius:15px;padding:14px 16px;margin-bottom:16px">
+      <div id="adminGeneratedTestsCard" style="background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 100%);border:1.5px solid #93c5fd;border-radius:15px;padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
           <div>
-            <strong style="font-size:14.5px;color:var(--primary-dark)">📝 Đề Kiểm Tra Từ Vựng Được Tạo Tự Động Từ Kho Admin (HSK - Bài - Text)</strong>
-            <div class="small">Mỗi khi Admin tải từ vựng lên kho HSK, hệ thống tự động tạo đề kiểm tra tại đây và đồng bộ cho toàn bộ tài khoản</div>
+            <strong style="font-size:14.5px;color:var(--primary-dark)">📝 Quản Lý Đề Kiểm Tra (Tạo Test & Xóa Test)</strong>
+            <div class="small">Tự tạo đề kiểm tra từ bất kỳ mục HSK-Bài-Text, kho cá nhân, từ sai hoặc nhập trực tiếp · Hỗ trợ xóa từng đề hoặc xóa tất cả</div>
           </div>
-          <span class="badge ai" id="generatedTestsCountBadge">0 đề đã tạo</span>
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+            <span class="badge ai" id="generatedTestsCountBadge">0 đề đã tạo</span>
+            <button type="button" class="primary toolbar-4d" style="padding:6px 12px;font-size:12.5px;min-height:34px" onclick="openCreateTestModal()">➕ Tạo Test mới</button>
+            <button type="button" class="danger" id="btnDeleteAllTests" style="display:none;padding:6px 11px;font-size:12.5px;min-height:34px" onclick="deleteAllGeneratedTests()">🗑️ Xóa tất cả Test</button>
+          </div>
         </div>
-        <div id="generatedTestsListBox" style="max-height:210px;overflow-y:auto"></div>
+        <div id="generatedTestsListBox" style="max-height:240px;overflow-y:auto"></div>
       </div>
 
       <div id="sourceSelectorCard" style="background:rgba(248,250,252,0.92);border:1px solid var(--line);border-radius:15px;padding:16px;margin-bottom:18px">
@@ -1504,7 +1508,8 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
             <label>1️⃣ Nguồn học tập</label>
             <select id="testSourceType" onchange="onTestSourceTypeChange()">
               <option value="admin">📚 Kho HSK hệ thống (Admin)</option>
-              <option value="personal">👤 Kho từ vựng cá nhân của tôi</option>
+              <option value="personal_catalog">👤 Kho cá nhân (Chọn HSK - Bài - Text)</option>
+              <option value="personal">📁 Kho cá nhân (Bộ từ tự do)</option>
               <option value="wrong">📌 Ôn lại từ sai ("Chép cho nhớ")</option>
             </select>
           </div>
@@ -1535,10 +1540,22 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
       </div>
 
       <div class="test-arena" id="testArenaBox">
+        <div id="testEmptyStateBox" style="text-align:center;padding:36px 18px;display:block">
+          <div style="font-size:42px;margin-bottom:8px">📝</div>
+          <strong style="font-size:17px;color:var(--ink);display:block;margin-bottom:6px">Chưa có đề kiểm tra hoặc từ vựng nào</strong>
+          <p class="small" style="max-width:520px;margin:0 auto 16px">Tất cả đề và text mẫu đã được xóa sạch. Bạn có thể bấm <b>➕ Tạo Test mới</b>, vào mục <b>🛡️ Quản trị HSK-Bài-Text</b> để tự đẩy từ vựng lên, hoặc dùng <b>🤖 AI Nhập từ / Word / Excel / Ảnh</b>.</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button type="button" class="primary toolbar-4d" onclick="openCreateTestModal()">➕ Tạo Test mới ngay</button>
+            <button type="button" class="ai-btn toolbar-4d" onclick="openAiSuperModal('test')">🤖 AI Nhập từ kiểm tra ngay</button>
+            <button type="button" class="warning toolbar-4d" onclick="switchTab('tab-admin')">🛡️ Vào Admin đẩy từ vựng</button>
+          </div>
+        </div>
+
+        <div id="testActiveArenaContent" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
           <div>
-            <span class="badge default" id="activeLessonTag">HSK 1 · Bài 1 · Text 1</span>
-            <strong style="margin-left:8px;font-size:14px" id="testProgressLabel">Từ 1 / 10</strong>
+            <span class="badge default" id="activeLessonTag">Chưa chọn bài</span>
+            <strong style="margin-left:8px;font-size:14px" id="testProgressLabel">Từ 0 / 0</strong>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-weight:800;color:var(--green);font-size:15px">Điểm phiên này: +<span id="sessionScoreVal">0</span></span>
@@ -1552,9 +1569,9 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
 
         <div class="prompt-card">
           <div class="small" style="font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--primary)">Hãy viết hoặc nhập chữ Hán tương ứng với nghĩa sau:</div>
-          <div class="prompt-meaning" id="promptMeaningText">Xin chào</div>
+          <div class="prompt-meaning" id="promptMeaningText">—</div>
           <div style="display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap">
-            <span id="promptPinyinHint" style="font-size:18px;font-weight:700;color:var(--accent)">nǐ hǎo</span>
+            <span id="promptPinyinHint" style="font-size:18px;font-weight:700;color:var(--accent)"></span>
             <button type="button" class="speaker-btn" onclick="speakCurrentTestWord()">🔊 Nghe phát âm mẫu</button>
           </div>
 
@@ -1623,6 +1640,7 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
           <button type="button" onclick="prevTestQuestion()">← Câu trước</button>
           <button type="button" class="ai-btn" id="btnNextQuestion" onclick="nextTestQuestion()" style="padding:11px 22px">Từ tiếp theo →</button>
         </div>
+        </div>
       </div>
     </section>
 
@@ -1672,51 +1690,103 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
     <section id="tab-myvocab" class="tab-content panel">
       <div class="section-header glass-bar toolbar-4d">
         <div>
-          <h2>👤 Kho Từ Vựng Cá Nhân (Lộ Trình Riêng Của Bạn)</h2>
-          <div class="small">Tự tạo các bài ôn tập cá nhân · Tự động đồng bộ theo tài khoản lên Internet Cloud</div>
+          <h2>👤 Kho Từ Vựng Cá Nhân (Phân Loại HSK - Bài - Text)</h2>
+          <div class="small">Chọn mục từ vựng 3 tầng HSK ➔ Bài ➔ Text như bên Admin · Tự động nhận từ vựng Admin đẩy vào & đồng bộ Cloud</div>
         </div>
-        <button class="primary toolbar-4d" onclick="createPersonalSetPrompt()">➕ Tạo bộ từ mới</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <div class="pill-tabs">
+            <button type="button" class="pill-tab active" id="myVocabModeCatalogBtn" onclick="switchMyVocabMode('catalog')">📚 HSK - Bài - Text</button>
+            <button type="button" class="pill-tab" id="myVocabModeSetsBtn" onclick="switchMyVocabMode('sets')">📁 Bộ từ tự do</button>
+          </div>
+          <button class="primary toolbar-4d" id="btnMyVocabHeaderAction" onclick="createPersonalSetPrompt()">➕ Tạo bộ từ mới</button>
+        </div>
       </div>
 
-      <div class="grid-2" style="margin-bottom:16px">
-        <div style="background:white;padding:16px;border-radius:14px;border:1px solid var(--line)">
-          <label style="font-weight:700;font-size:13.5px;display:block;margin-bottom:6px">Chọn bộ từ cá nhân của bạn:</label>
-          <div style="display:flex;gap:8px;margin-bottom:12px">
-            <select id="personalSetSelect" style="flex:1" onchange="renderPersonalVocabList()"></select>
-            <button class="danger" onclick="deleteCurrentPersonalSet()" title="Xóa bộ từ này">🗑️</button>
+      <!-- Thông báo từ vựng Admin vừa đẩy vào kho thành viên -->
+      <div id="memberPushInboxBanner" style="display:none;background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);border:1.5px solid #86efac;border-radius:14px;padding:12px 15px;margin-bottom:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <strong style="color:#15803d;font-size:13.5px" id="memberPushInboxTitle">📩 Admin vừa đẩy từ vựng mới vào kho của bạn!</strong>
+          <div class="small" style="color:#166534" id="memberPushInboxDetail"></div>
+        </div>
+        <button type="button" class="success" style="font-size:12px;padding:6px 12px;min-height:32px" onclick="jumpToLatestPushedMyCatalog()">🎯 Mở mục vừa nhận</button>
+      </div>
+
+      <!-- CHẾ ĐỘ 1: CHỌN MỤC 3 TẦNG HSK - BÀI - TEXT GIỐNG BÊN ADMIN -->
+      <div id="myVocabCatalogBox" style="background:rgba(239,246,255,0.85);border:1.5px solid #93c5fd;border-radius:15px;padding:16px;margin-bottom:16px">
+        <div class="grid-3" style="margin-bottom:12px">
+          <div class="form-group" style="margin:0">
+            <label>Tầng 1: Cấp độ HSK</label>
+            <div style="display:flex;gap:6px">
+              <select id="myHskSelect" style="flex:1" onchange="onMyHskChange()"></select>
+              <button type="button" class="primary" onclick="myAddHskLevel()" title="Thêm cấp HSK cá nhân">＋</button>
+            </div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="primary" onclick="testPersonalSet()">🎯 Kiểm tra bộ từ này</button>
-            <button class="success" onclick="sendPersonalSetToWrongCopybook()">✍️ Đưa sang vở chép 2 dòng</button>
+          <div class="form-group" style="margin:0">
+            <label>Tầng 2: Bài học (Bài 1, Bài 2...)</label>
+            <div style="display:flex;gap:6px">
+              <select id="myLessonSelect" style="flex:1" onchange="onMyLessonChange()"></select>
+              <button type="button" class="primary" onclick="myAddLesson()" title="Thêm Bài học mới">＋</button>
+            </div>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Tầng 3: Phần Text (Text 1, Text 2...)</label>
+            <div style="display:flex;gap:6px">
+              <select id="myTextSelect" style="flex:1" onchange="renderPersonalVocabList()"></select>
+              <button type="button" class="primary" onclick="myAddTextSection()" title="Thêm mục Text mới">＋</button>
+            </div>
           </div>
         </div>
 
-        <div class="ai-hub-box">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px">
-            <strong style="font-size:14px;color:var(--primary-dark)">🤖 Trợ Lý AI Nhập Từ Vựng Cá Nhân</strong>
-            <span class="badge ai">Tự tạo Pinyin & Nghĩa</span>
-          </div>
-          <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
-            <input type="text" id="myNewZh" placeholder="Chỉ cần nhập Chữ Hán (VD: 图书馆)..." style="flex:1.2;min-width:130px">
-            <input type="text" id="myNewPy" placeholder="Pinyin (AI tự điền)" style="flex:1;min-width:95px">
-            <input type="text" id="myNewVi" placeholder="Nghĩa (AI tự dịch)" style="flex:1.1;min-width:110px">
-            <button class="primary" onclick="addWordToPersonalSet()">Thêm</button>
-          </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <span class="badge default" id="myCurrentPathLabel">Chưa có mục HSK - Bài - Text</span>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <label class="toolbar-4d" style="cursor:pointer;padding:7px 12px;border:1px solid #a5b4fc;background:white;border-radius:10px;font-size:12.5px">
-              📄 AI Đọc Word (.docx)
-              <input type="file" accept=".docx,.doc" style="display:none" onchange="handleAiFileUpload(event, 'word', 'personal')">
-            </label>
-            <label class="toolbar-4d" style="cursor:pointer;padding:7px 12px;border:1px solid #a5b4fc;background:white;border-radius:10px;font-size:12.5px">
-              📊 AI Đọc Excel (.xlsx)
-              <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleAiFileUpload(event, 'excel', 'personal')">
-            </label>
-            <label class="toolbar-4d" style="cursor:pointer;padding:7px 12px;border:1px solid #818cf8;background:#eef2ff;color:#1d4ed8;border-radius:10px;font-size:12.5px;font-weight:700">
-              🖼️ Quét nhiều ảnh (OCR)
-              <input type="file" accept="image/*" multiple style="display:none" onchange="handleQuickMultiImageUpload(event, 'personal')">
-            </label>
-            <button type="button" class="ai-btn" style="font-size:12.5px;padding:7px 12px" onclick="openAiSuperModal('personal')">✨ Studio AI Toàn Năng</button>
+            <button type="button" class="primary" style="font-size:12.5px;padding:7px 13px" onclick="testPersonalSet()">🎯 Kiểm tra mục này</button>
+            <button type="button" class="success" style="font-size:12.5px;padding:7px 13px" onclick="sendPersonalSetToWrongCopybook()">✍️ Đưa sang vở chép 2 dòng</button>
+            <button type="button" style="font-size:12.5px;padding:7px 12px" onclick="exportMyCatalogTextToExcel()">📊 Xuất Excel</button>
+            <button type="button" class="danger" style="font-size:12.5px;padding:7px 12px" onclick="myDeleteCurrentText()">🗑️ Xóa Text</button>
           </div>
+        </div>
+      </div>
+
+      <!-- CHẾ ĐỘ 2: BỘ TỪ TỰ DO -->
+      <div id="myVocabSetsBox" style="display:none;background:white;padding:16px;border-radius:14px;border:1px solid var(--line);margin-bottom:16px">
+        <label style="font-weight:700;font-size:13.5px;display:block;margin-bottom:6px">Chọn bộ từ cá nhân tự do của bạn:</label>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <select id="personalSetSelect" style="flex:1" onchange="renderPersonalVocabList()"></select>
+          <button class="danger" onclick="deleteCurrentPersonalSet()" title="Xóa bộ từ này">🗑️</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="primary" onclick="testPersonalSet()">🎯 Kiểm tra bộ từ này</button>
+          <button class="success" onclick="sendPersonalSetToWrongCopybook()">✍️ Đưa sang vở chép 2 dòng</button>
+        </div>
+      </div>
+
+      <!-- KHUNG THÊM TỪ & TRỢ LÝ AI (TỰ ĐỘNG LƯU VÀO ĐÚNG MỤC HSK-BÀI-TEXT HOẶC BỘ TỪ ĐANG CHỌN) -->
+      <div class="ai-hub-box" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+          <strong style="font-size:14px;color:var(--primary-dark)">🤖 Thêm Từ / Trợ Lý AI Nhập Vào Mục Đang Chọn</strong>
+          <span class="badge ai" id="myAddTargetHintBadge">Chưa chọn mục lưu</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+          <input type="text" id="myNewZh" placeholder="Chỉ cần nhập Chữ Hán (VD: 图书馆)..." style="flex:1.2;min-width:130px">
+          <input type="text" id="myNewPy" placeholder="Pinyin (AI tự điền)" style="flex:1;min-width:95px">
+          <input type="text" id="myNewVi" placeholder="Nghĩa (AI tự dịch)" style="flex:1.1;min-width:110px">
+          <button class="primary" onclick="addWordToPersonalSet()">✨ Thêm từ</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label class="toolbar-4d" style="cursor:pointer;padding:7px 12px;border:1px solid #a5b4fc;background:white;border-radius:10px;font-size:12.5px">
+            📄 AI Đọc Word (.docx)
+            <input type="file" accept=".docx,.doc" style="display:none" onchange="handleAiFileUpload(event, 'word', 'personal')">
+          </label>
+          <label class="toolbar-4d" style="cursor:pointer;padding:7px 12px;border:1px solid #a5b4fc;background:white;border-radius:10px;font-size:12.5px">
+            📊 AI Đọc Excel (.xlsx)
+            <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleAiFileUpload(event, 'excel', 'personal')">
+          </label>
+          <label class="toolbar-4d" style="cursor:pointer;padding:7px 12px;border:1px solid #818cf8;background:#eef2ff;color:#1d4ed8;border-radius:10px;font-size:12.5px;font-weight:700">
+            🖼️ Quét nhiều ảnh (OCR)
+            <input type="file" accept="image/*" multiple style="display:none" onchange="handleQuickMultiImageUpload(event, 'personal')">
+          </label>
+          <button type="button" class="ai-btn" style="font-size:12.5px;padding:7px 12px" onclick="openAiSuperModal('personal')">✨ Studio AI Toàn Năng</button>
         </div>
       </div>
 
@@ -1779,8 +1849,9 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
           <div class="small">Mọi cập nhật tại đây sẽ tự động đẩy lên Internet Cloud để toàn bộ học viên cập nhật tức thì</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="primary" onclick="openCreateTestModal('admin_catalog')">➕ Tạo Test mới</button>
           <button class="warning" id="btnQuickAdminSwitch" onclick="toggleAdminMode()">🔐 Đăng nhập Admin</button>
-          <button class="ai-btn" onclick="pushCloudState('Admin cập nhật kho HSK')">🌐 Xuất bản cập nhật lên Internet</button>
+          <button class="ai-btn" onclick="publishAdminCatalogNow()">🌐 Đồng bộ ngay cho Admin & Học viên</button>
         </div>
       </div>
 
@@ -1819,10 +1890,14 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
           </div>
 
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-            <span class="badge default" id="admCurrentPathLabel">HSK 1 ➔ Bài 1 ➔ Text 1</span>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button type="button" class="danger" style="font-size:12.5px" onclick="admDeleteCurrentText()">🗑️ Xóa Text đang chọn</button>
-              <button type="button" style="font-size:12.5px" onclick="exportAdminTextToExcel()">📊 Xuất Excel bài này</button>
+            <span class="badge default" id="admCurrentPathLabel">Chưa có mục HSK - Bài - Text nào</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button type="button" class="primary" style="font-size:12px;padding:6px 11px" onclick="openCreateTestModal('admin_catalog')">📝 Tạo Test từ mục này</button>
+              <button type="button" style="font-size:12px;padding:6px 11px" onclick="exportAdminTextToExcel()">📊 Xuất Excel</button>
+              <button type="button" class="danger" style="font-size:12px;padding:6px 10px" onclick="admDeleteCurrentText()">🗑️ Xóa Text</button>
+              <button type="button" class="danger" style="font-size:12px;padding:6px 10px" onclick="admDeleteCurrentLesson()">🗑️ Xóa Bài</button>
+              <button type="button" class="danger" style="font-size:12px;padding:6px 10px" onclick="admDeleteCurrentHsk()">🗑️ Xóa HSK</button>
+              <button type="button" class="crimson" style="font-size:12px;padding:6px 10px" onclick="admClearAllCatalogAndTests()">🧹 Xóa sạch tất cả</button>
             </div>
           </div>
         </div>
@@ -1866,10 +1941,85 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
           </div>
         </div>
 
-                <div id="adminExamCreatedNotice" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:13px;padding:12px 16px;margin-bottom:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+                <!-- BẢNG ĐẨY TỪ VỰNG VÀO KHO CỦA THÀNH VIÊN (CHỌN MỤC HSK-BÀI-TEXT & CHỌN THÀNH VIÊN) -->
+        <div id="adminPushToMemberCard" style="background:linear-gradient(135deg,#fffbeb 0%,#eff6ff 55%,#f5f3ff 100%);border:1.5px solid #818cf8;border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:0 6px 20px rgba(99,102,241,0.08)">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+            <div>
+              <strong style="font-size:15px;color:var(--primary-dark);display:flex;align-items:center;gap:6px">
+                <span>🚀 Đẩy Từ Vựng Vào Kho Của Thành Viên (Giữ Nguyên Phân Loại HSK - Bài - Text)</span>
+              </strong>
+              <div class="small">Chọn phạm vi HSK - Bài - Text cần đẩy và chọn tất cả hoặc từng tài khoản thành viên nhận</div>
+            </div>
+            <span class="badge ai" id="admPushPreviewBadge">Sẵn sàng đẩy</span>
+          </div>
+
+          <div class="grid-2" style="gap:12px;margin-bottom:12px">
+            <div style="background:white;padding:12px;border-radius:12px;border:1px solid var(--line)">
+              <label style="display:block;font-size:12.5px;font-weight:700;color:var(--primary-dark);margin-bottom:6px">1️⃣ Phạm vi từ vựng muốn đẩy:</label>
+              <select id="admPushScopeSelect" onchange="updateAdminPushPreview()" style="width:100%;margin-bottom:8px;font-size:13px">
+                <option value="text">📄 Chỉ mục Text đang chọn ở trên</option>
+                <option value="lesson">📖 Toàn bộ Bài học đang chọn (tất cả Text)</option>
+                <option value="hsk">📚 Toàn bộ cấp độ HSK đang chọn</option>
+                <option value="all">🌐 Toàn bộ Kho HSK hệ thống</option>
+              </select>
+              <div class="small" id="admPushScopeDetail" style="color:#1e3a8a;font-weight:600;background:#eff6ff;padding:7px 10px;border-radius:8px;border:1px dashed #93c5fd">
+                Đang chọn: HSK 1 ➔ Bài 1 ➔ Text 1
+              </div>
+              <label class="small" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;cursor:pointer;font-weight:600">
+                <input type="checkbox" id="admPushAutoExamChk" checked> Tự động tạo đề kiểm tra cho thành viên
+              </label>
+            </div>
+
+            <div style="background:white;padding:12px;border-radius:12px;border:1px solid var(--line)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px">
+                <label style="font-size:12.5px;font-weight:700;color:#15803d;margin:0">2️⃣ Chọn thành viên nhận (<span id="admSelectedMemberCount">0</span>):</label>
+                <div style="display:flex;gap:5px">
+                  <button type="button" style="padding:3px 8px;font-size:11.5px;min-height:26px" onclick="toggleAllPushMembers(true)">Chọn tất cả</button>
+                  <button type="button" style="padding:3px 8px;font-size:11.5px;min-height:26px" onclick="toggleAllPushMembers(false)">Bỏ chọn</button>
+                </div>
+              </div>
+              <div id="admPushMembersList" style="max-height:112px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:4px 2px;margin-bottom:8px"></div>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="admPushCustomEmail" placeholder="Hoặc nhập thêm Email thành viên..." style="flex:1;padding:6px 10px;font-size:12.5px">
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <span class="small">Từ vựng sẽ xuất hiện đúng theo cấu trúc <b>HSK ➔ Bài ➔ Text</b> trong mục <b>👤 Từ vựng cá nhân</b> của thành viên.</span>
+            <button type="button" class="ai-btn toolbar-4d" id="btnAdminPushToMembers" onclick="adminPushVocabToMembers()" style="padding:10px 20px;font-size:14px">
+              🚀 Đẩy từ vựng vào kho thành viên đã chọn
+            </button>
+          </div>
+        </div>
+
+        <div id="adminDualRepoStatusBar" style="background:linear-gradient(135deg,#f0fdf4 0%,#eff6ff 100%);border:1.5px solid #86efac;border-radius:14px;padding:12px 16px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+            <strong style="font-size:13.5px;color:#15803d">⚡ Chế Độ Thêm Đồng Thời 2 Kho (Kho Admin & Kho Học Viên Tự Động Đồng Nhất 100%)</strong>
+            <span class="badge ok" id="dualRepoSyncTimestamp">● Sẵn sàng đồng bộ tức thì</span>
+          </div>
+          <div class="grid-2" style="gap:10px">
+            <div style="background:white;padding:10px 12px;border-radius:11px;border:1px solid #bfdbfe;display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <div>
+                <div class="small" style="font-weight:700;color:var(--primary-dark)">🛡️ Kho từ vựng Admin</div>
+                <strong style="font-size:15px;color:var(--ink)" id="dualRepoAdminCount">0 từ vựng</strong>
+              </div>
+              <button type="button" class="primary" style="padding:5px 10px;font-size:12px;min-height:30px" onclick="switchTab('tab-myvocab')">Xem kho</button>
+            </div>
+            <div style="background:white;padding:10px 12px;border-radius:11px;border:1px solid #86efac;display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <div>
+                <div class="small" style="font-weight:700;color:#15803d">🎓 Kho từ vựng Học viên (<span id="dualRepoStudentAccNum">1</span> tài khoản)</div>
+                <strong style="font-size:15px;color:#15803d" id="dualRepoStudentCount">0 từ vựng · Cùng lúc</strong>
+              </div>
+              <button type="button" class="success" style="padding:5px 10px;font-size:12px;min-height:30px" onclick="switchTab('tab-cloud')">Chi tiết</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="adminExamCreatedNotice" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:13px;padding:12px 16px;margin-bottom:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
           <div>
-            <strong style="color:#15803d;font-size:14px" id="adminExamCreatedText">✅ Đã tạo đề kiểm tra từ vựng & tự động nhập từ vào kho Thành viên / Quản trị viên!</strong>
-            <div class="small" style="color:#166534" id="adminExamCreatedSub">Hệ thống đã đồng bộ lên Internet và ghi nhận các tài khoản được cập nhật.</div>
+            <strong style="color:#15803d;font-size:14px" id="adminExamCreatedText">✅ Đã thêm đồng thời vào Kho Admin & Kho Học viên, đồng thời tạo đề kiểm tra!</strong>
+            <div class="small" style="color:#166534" id="adminExamCreatedSub">Hệ thống đã đồng bộ tức thì cho toàn bộ tài khoản.</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button type="button" class="success" style="font-size:12.5px;padding:7px 14px" onclick="switchTab('tab-test')">🎯 Mở đề kiểm tra vừa tạo</button>
@@ -1885,56 +2035,98 @@ footer{text-align:center;padding:18px 14px;color:var(--muted);font-size:13px;bor
     <section id="tab-cloud" class="tab-content panel">
       <div class="section-header glass-bar toolbar-4d">
         <div>
-          <h2>🌐 Đồng Bộ Internet Tự Động Toàn Hệ Thống (Zero-Config)</h2>
-          <div class="small">Không cần mã phòng hay API Key — Mọi cập nhật từ Admin tự động đẩy tới tất cả người dùng đang truy cập web</div>
+          <h2>🌐 Trung Tâm Đồng Bộ Thời Gian Thực (Super Sync v14)</h2>
+          <div class="small">Nén Gzip 90% · Đồng bộ đa tầng (Tab tức thì + Real-time Push + Cloud Mirror + Tự hỏi dữ liệu máy đang online)</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="ai-btn toolbar-4d" onclick="forceFullSyncNow()">🔄 Kiểm tra cập nhật ngay</button>
-          <button onclick="exportBackupJson()">💾 Tải bản sao lưu (.json)</button>
+          <button class="ai-btn toolbar-4d" id="btnCloudPullNow" onclick="forcePullFromInternetNow()">📥 Kéo bản mới nhất ngay</button>
+          <button class="success toolbar-4d" id="btnCloudPushNow" onclick="forcePushToInternetNow()">🚀 Đẩy dữ liệu lên Cloud ngay</button>
         </div>
       </div>
 
-      <div style="background:white;border:1.5px solid #bfdbfe;border-radius:16px;padding:18px;margin-bottom:18px">
+      <!-- Thanh tiến trình đồng bộ trực tiếp -->
+      <div id="cloudSyncProgressWrap" style="display:none;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:13px;padding:12px 15px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--primary-dark)">
+          <span id="cloudSyncProgressText">⚡ Đang nén & đồng bộ dữ liệu...</span>
+          <span id="cloudSyncProgressPct">0%</span>
+        </div>
+        <div class="ai-progress-bar-wrap" style="margin:6px 0 0">
+          <div class="ai-progress-bar-fill" id="cloudSyncProgressFill"></div>
+        </div>
+      </div>
+
+      <div style="background:white;border:1.5px solid #bfdbfe;border-radius:16px;padding:18px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
           <div>
-            <strong style="font-size:16px;color:var(--primary-dark);display:block">🚀 Cơ Chế Đồng Bộ Toàn Cầu Tự Động 100%</strong>
-            <span class="small">Hệ thống tự động phát hiện tên miền trang web và kết nối tất cả thiết bị vào một máy chủ đám mây duy nhất mà không cần nhập mã phòng hay key.</span>
+            <strong style="font-size:16px;color:var(--primary-dark);display:block">⚡ Kiến Trúc Đồng Bộ 4 Tầng Tự Phục Hồi (Auto-Heal)</strong>
+            <span class="small">Tự nén gọn từ vựng gấp 10 lần, tự hỏi lại máy đang online nếu dữ liệu mới bị lệch, và xác nhận biên lai cập nhật tức thì cho từng tài khoản.</span>
           </div>
-          <span class="badge ok" style="font-size:12.5px;padding:5px 12px">✓ Tự động kết nối</span>
+          <span class="badge ok" id="cloudOverallHealthBadge" style="font-size:12.5px;padding:5px 12px">✓ Hệ thống đồng bộ sẵn sàng</span>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px">
-          <div style="background:#f8fafc;padding:12px;border-radius:12px;border:1px solid var(--line)">
-            <div class="small">Trạng thái Internet</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(175px, 1fr));gap:10px;margin-bottom:14px">
+          <div style="background:#f8fafc;padding:11px;border-radius:12px;border:1px solid var(--line)">
+            <div class="small">Trạng thái mạng</div>
             <strong id="cloudDiagNet" style="color:var(--green)">● Trực tuyến (Online)</strong>
           </div>
-          <div style="background:#f8fafc;padding:12px;border-radius:12px;border:1px solid var(--line)">
-            <div class="small">Phiên bản dữ liệu web</div>
-            <strong id="cloudDiagVersion" style="color:var(--primary)">v1</strong>
+          <div style="background:#f8fafc;padding:11px;border-radius:12px;border:1px solid var(--line)">
+            <div class="small">Phiên bản & Kho HSK</div>
+            <strong id="cloudDiagVersion" style="color:var(--primary)">v1 · 0 từ</strong>
           </div>
-          <div style="background:#f8fafc;padding:12px;border-radius:12px;border:1px solid var(--line)">
-            <div class="small">Kênh cập nhật tức thì</div>
-            <strong id="cloudDiagSse" style="color:var(--accent)">● Đang lắng nghe Push</strong>
+          <div style="background:#f8fafc;padding:11px;border-radius:12px;border:1px solid var(--line)">
+            <div class="small">Kênh Push Real-time (SSE)</div>
+            <strong id="cloudDiagSse" style="color:var(--accent)">● Đang kết nối...</strong>
           </div>
-          <div style="background:#f8fafc;padding:12px;border-radius:12px;border:1px solid var(--line)">
+          <div style="background:#f8fafc;padding:11px;border-radius:12px;border:1px solid var(--line)">
+            <div class="small">Lưu trữ Cloud (Mirror)</div>
+            <strong id="cloudDiagMirror" style="color:var(--primary-dark)">● Tự động</strong>
+          </div>
+          <div style="background:#f8fafc;padding:11px;border-radius:12px;border:1px solid var(--line)">
+            <div class="small">Dung lượng gói nén</div>
+            <strong id="cloudDiagPayloadSize" style="color:var(--ink)">—</strong>
+          </div>
+          <div style="background:#f8fafc;padding:11px;border-radius:12px;border:1px solid var(--line)">
             <div class="small">Lần đồng bộ gần nhất</div>
-            <strong id="cloudDiagTime">Vừa xong</strong>
+            <strong id="cloudDiagTime">Chưa đồng bộ</strong>
           </div>
         </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button type="button" class="primary" style="font-size:12.5px;padding:7px 12px" onclick="copyInstantSyncLink()">🔗 Sao chép Link đồng bộ tức thì</button>
+          <button type="button" style="font-size:12.5px;padding:7px 12px" onclick="exportBackupJson()">💾 Xuất sao lưu (.json)</button>
+          <label style="cursor:pointer;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:white;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:5px">
+            📂 Nhập sao lưu (.json)
+            <input type="file" accept=".json" style="display:none" onchange="importBackupJsonFile(event)">
+          </label>
+          <button type="button" class="warning" style="font-size:12.5px;padding:7px 12px" onclick="reconnectRealtimeChannels()">🔌 Kết nối lại kênh Push</button>
+        </div>
+
+        <details style="margin-top:12px;background:#f8fafc;padding:10px 13px;border-radius:11px;border:1px solid var(--line)">
+          <summary style="cursor:pointer;font-weight:700;font-size:13px;color:var(--primary-dark)">🔥 Tùy chọn nâng cao: Gắn Firebase Realtime DB riêng (Lưu trữ vĩnh viễn 100% miễn phí)</summary>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <input type="text" id="firebaseDbUrlInput" placeholder="https://ten-du-an-default-rtdb.firebaseio.com" style="flex:1;min-width:220px;font-size:13px">
+            <button type="button" class="primary" style="font-size:12.5px" onclick="saveFirebaseDbUrl()">Lưu Firebase & Đồng bộ</button>
+            <button type="button" class="danger" style="font-size:12.5px" onclick="clearFirebaseDbUrl()">Gỡ Firebase</button>
+          </div>
+          <div class="small" style="margin-top:6px">Mặc định trang web đã tự đồng bộ qua mạng Internet không cần cài đặt. Nếu lớp học cần lưu dữ liệu nhiều tháng liên tục, dán link Firebase Realtime Database (bật quyền read/write) vào ô trên.</div>
+        </details>
       </div>
 
-            <div style="background:white;border:1.5px solid #86efac;border-radius:16px;padding:18px;margin-bottom:18px">
+      <div style="background:white;border:1.5px solid #86efac;border-radius:16px;padding:18px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
           <div>
             <strong style="font-size:15.5px;color:#15803d;display:block">📋 Báo Cáo Hệ Thống: Tài Khoản Đã Được Cập Nhật Từ Vựng & Đề Kiểm Tra</strong>
-            <span class="small">Tự động nhập từ vựng mới của Admin vào kho cá nhân của Thành viên & Quản trị viên, đồng thời xác nhận trạng thái cập nhật từng tài khoản</span>
+            <span class="small">Tự động nhập từ vựng mới của Admin vào kho cá nhân của Thành viên & Quản trị viên, đồng thời nhận biên lai xác nhận trực tuyến từng tài khoản</span>
           </div>
           <span class="badge ok" id="cloudUpdatedAccSummary">0 tài khoản đã cập nhật</span>
         </div>
         <div class="vocab-list" id="cloudAccountReceiptsList" style="max-height:260px;margin-top:0"></div>
       </div>
 
-      <h3 style="font-size:15px;margin-bottom:8px">📜 Nhật ký đồng bộ tự động trên Internet</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 style="font-size:15px;margin:0">📜 Nhật ký chẩn đoán đồng bộ trực tiếp</h3>
+        <button type="button" style="font-size:12px;padding:4px 10px;min-height:28px" onclick="$('cloudSyncLogBox').innerHTML=''">Xóa nhật ký</button>
+      </div>
       <div id="cloudSyncLogBox" style="background:#0f172a;color:#e2e8f0;font-family:monospace;font-size:12.5px;padding:14px;border-radius:12px;max-height:240px;overflow-y:auto;line-height:1.6"></div>
     </section>
   </main>
@@ -2163,6 +2355,115 @@ def strategy():
   </div>
 </div>
 
+<!-- ==================== MODAL TẠO TEST MỚI ==================== -->
+<div class="modal-backdrop" id="createTestModal" onclick="if(event.target===this)closeCreateTestModal()">
+  <div class="modal-card wide-ai" style="max-width:680px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px">
+      <div>
+        <strong style="font-size:18px;color:var(--primary-dark)">➕ Tạo Đề Kiểm Tra Từ Vựng Mới (Create Test)</strong>
+        <div class="small">Chọn từ vựng từ Kho HSK, Kho Cá nhân, Sổ từ sai hoặc tự nhập — tự động lưu và đồng bộ</div>
+      </div>
+      <button type="button" onclick="closeCreateTestModal()" style="padding:4px 10px;min-height:32px">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label>1️⃣ Tên đề kiểm tra (Test Title)</label>
+      <input type="text" id="ctTestTitleInput" placeholder="VD: Kiểm tra HSK 1 - Bài 1, Ôn tập từ mới tuần 1... (Để trống sẽ tự đặt tên)">
+    </div>
+
+    <div class="grid-2" style="gap:12px;margin-bottom:12px">
+      <div class="form-group" style="margin:0">
+        <label>2️⃣ Nguồn từ vựng để tạo Test</label>
+        <select id="ctSourceMode" onchange="onCreateTestSourceChange()">
+          <option value="admin_catalog">📚 Kho HSK hệ thống (Admin)</option>
+          <option value="personal_catalog">👤 Kho Cá nhân (HSK - Bài - Text)</option>
+          <option value="personal_set">📁 Kho Cá nhân (Bộ từ tự do)</option>
+          <option value="wrong">📌 Sổ "Chép cho nhớ" (Từ sai)</option>
+          <option value="custom_text">✍️ Tự nhập / dán chữ Hán (AI hỗ trợ dịch)</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin:0" id="ctScopeCol">
+        <label>3️⃣ Phạm vi lấy từ</label>
+        <select id="ctCatalogScope" onchange="updateCreateTestPreview()">
+          <option value="text">📄 Chỉ mục Text đang chọn</option>
+          <option value="lesson">📖 Toàn bộ Bài học đang chọn</option>
+          <option value="hsk">📚 Toàn bộ cấp độ HSK đang chọn</option>
+          <option value="all">🌐 Toàn bộ kho</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Bộ chọn 3 tầng HSK - Bài - Text trong Modal Tạo Test -->
+    <div id="ctCatalogSelectorsBox" style="background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div class="grid-3" style="gap:8px">
+        <div class="form-group" style="margin:0">
+          <label>Cấp độ HSK</label>
+          <select id="ctHskSelect" onchange="onCtHskChange()"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Bài học</label>
+          <select id="ctLessonSelect" onchange="onCtLessonChange()"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Phần Text</label>
+          <select id="ctTextSelect" onchange="updateCreateTestPreview()"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bộ chọn Bộ từ tự do -->
+    <div id="ctPersonalSetBox" style="display:none;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px">
+      <label style="font-size:12.5px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px">Chọn bộ từ cá nhân:</label>
+      <select id="ctPersonalSetSelect" style="width:100%" onchange="updateCreateTestPreview()"></select>
+    </div>
+
+    <!-- Khu vực tự nhập / dán chữ Hán trực tiếp -->
+    <div id="ctCustomTextBox" style="display:none;background:#f8fafc;border:1px solid #a5b4fc;border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+        <label style="font-size:12.5px;font-weight:700;color:var(--primary-dark);margin:0">Nhập / dán danh sách từ vựng (AI tự tạo Pinyin & Nghĩa nếu chỉ nhập chữ Hán):</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <label style="cursor:pointer;padding:4px 9px;border:1px solid #a5b4fc;background:white;border-radius:8px;font-size:12px;font-weight:700">
+            📄 Đọc Word
+            <input type="file" accept=".docx,.doc" style="display:none" onchange="handleCreateTestFileImport(event, 'word')">
+          </label>
+          <label style="cursor:pointer;padding:4px 9px;border:1px solid #a5b4fc;background:white;border-radius:8px;font-size:12px;font-weight:700">
+            📊 Đọc Excel
+            <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleCreateTestFileImport(event, 'excel')">
+          </label>
+        </div>
+      </div>
+      <textarea id="ctCustomWordsTextarea" rows="4" style="width:100%;font-size:14px;background:white" placeholder="Mỗi dòng 1 từ hoặc cách nhau bằng dấu phẩy:&#10;你好 | nǐ hǎo | Xin chào&#10;图书馆&#10;医院, 超市, 银行" oninput="updateCreateTestPreview()"></textarea>
+    </div>
+
+    <!-- Cấu hình câu hỏi -->
+    <div class="grid-2" style="gap:12px;align-items:center;background:#eff6ff;padding:12px;border-radius:12px;border:1px solid #bfdbfe;margin-bottom:14px">
+      <div class="form-group" style="margin:0">
+        <label>Giới hạn số câu hỏi (0 hoặc để trống = Lấy tất cả)</label>
+        <input type="number" id="ctMaxQuestionsInput" min="0" placeholder="0 = Lấy toàn bộ từ" style="background:white" oninput="updateCreateTestPreview()">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label class="small" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;color:var(--ink)">
+          <input type="checkbox" id="ctShuffleChk" checked> 🔀 Trộn ngẫu nhiên thứ tự câu hỏi
+        </label>
+        <label class="small" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;color:var(--ink)">
+          <input type="checkbox" id="ctStartNowChk" checked> 🚀 Mở làm bài kiểm tra ngay sau khi tạo
+        </label>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <span class="badge ok" id="ctWordCountPreview" style="font-size:12.5px;padding:6px 12px">📋 Sẽ tạo đề gồm: 0 câu hỏi</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" onclick="closeCreateTestModal()">Hủy</button>
+        <button type="button" class="ai-btn" id="btnSubmitCreateTest" onclick="submitCreateTestModal()" style="padding:10px 22px;font-size:14.5px">
+          🚀 Tạo & Lưu Test
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ==================== MODAL ĐĂNG NHẬP / ĐĂNG KÝ ==================== -->
 <div class="modal-backdrop" id="authModal" onclick="if(event.target===this)closeAuthModal()">
   <div class="modal-card">
@@ -2316,12 +2617,14 @@ function detectPlatformLabel() {
   if (badge) badge.textContent = `📱 ${os} · ${form}`;
 }
 window.addEventListener('resize', () => {
-  detectPlatformLabel();
+  if ($('firebaseDbUrlInput')) $('firebaseDbUrlInput').value = firebaseDbUrl;
+detectPlatformLabel();
   autoScaleCopybookSheet();
 });
 window.addEventListener('orientationchange', () => {
   setTimeout(() => {
-    detectPlatformLabel();
+    if ($('firebaseDbUrlInput')) $('firebaseDbUrlInput').value = firebaseDbUrl;
+detectPlatformLabel();
     autoScaleCopybookSheet();
   }, 150);
 });
@@ -2368,111 +2671,34 @@ function speakChinese(text) {
 }
 if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 
-// ==================== 1. KHO DỮ LIỆU MẶC ĐỊNH ADMIN (HSK -> BÀI -> TEXT) ====================
-const DEFAULT_ADMIN_CATALOG = [
-  {
-    hsk: "HSK 1",
-    lessons: [
-      {
-        id: "hsk1_b1",
-        name: "Bài 1: 你好 (Xin chào)",
-        texts: [
-          {
-            id: "hsk1_b1_t1",
-            name: "Text 1: Chào hỏi cơ bản",
-            words: [
-              { id: "w1", zh: "你好", pinyin: "nǐ hǎo", vi: "Xin chào" },
-              { id: "w2", zh: "您好", pinyin: "nín hǎo", vi: "Xin chào (kính trọng)" },
-              { id: "w3", zh: "你们", pinyin: "nǐmen", vi: "Các bạn" },
-              { id: "w4", zh: "对不起", pinyin: "duìbuqǐ", vi: "Xin lỗi" },
-              { id: "w5", zh: "没关系", pinyin: "méi guānxi", vi: "Không sao đâu" }
-            ]
-          },
-          {
-            id: "hsk1_b1_t2",
-            name: "Text 2: Cảm ơn & Tạm biệt",
-            words: [
-              { id: "w6", zh: "谢谢", pinyin: "xièxie", vi: "Cảm ơn" },
-              { id: "w7", zh: "不客气", pinyin: "bú kèqi", vi: "Đừng khách sáo" },
-              { id: "w8", zh: "再见", pinyin: "zàijiàn", vi: "Tạm biệt" }
-            ]
-          }
-        ]
-      },
-      {
-        id: "hsk1_b2",
-        name: "Bài 2: 你叫什么名字 (Bạn tên là gì)",
-        texts: [
-          {
-            id: "hsk1_b2_t1",
-            name: "Text 1: Hỏi tên & Quốc tịch",
-            words: [
-              { id: "w9", zh: "叫", pinyin: "jiào", vi: "Gọi là, tên là" },
-              { id: "w10", zh: "什么", pinyin: "shénme", vi: "Cái gì" },
-              { id: "w11", zh: "名字", pinyin: "míngzi", vi: "Tên" },
-              { id: "w12", zh: "老师", pinyin: "lǎoshī", vi: "Giáo viên" },
-              { id: "w13", zh: "学生", pinyin: "xuésheng", vi: "Học sinh, sinh viên" },
-              { id: "w14", zh: "中国", pinyin: "Zhōngguó", vi: "Trung Quốc" },
-              { id: "w15", zh: "越南", pinyin: "Yuènán", vi: "Việt Nam" }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    hsk: "HSK 2",
-    lessons: [
-      {
-        id: "hsk2_b1",
-        name: "Bài 1: 九月去北京旅游最好 (Du lịch Bắc Kinh)",
-        texts: [
-          {
-            id: "hsk2_b1_t1",
-            name: "Text 1: Du lịch & Thời tiết",
-            words: [
-              { id: "w21", zh: "旅游", pinyin: "lǚyóu", vi: "Du lịch" },
-              { id: "w22", zh: "觉得", pinyin: "juéde", vi: "Cảm thấy" },
-              { id: "w23", zh: "最", pinyin: "zuì", vi: "Nhất" },
-              { id: "w24", zh: "为什么", pinyin: "wèishénme", vi: "Tại sao" },
-              { id: "w25", zh: "运动", pinyin: "yùndòng", vi: "Vận động, thể thao" }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    hsk: "HSK 3",
-    lessons: [
-      {
-        id: "hsk3_b1",
-        name: "Bài 1: Địa điểm & Nơi chốn thông dụng",
-        texts: [
-          {
-            id: "hsk3_b1_t1",
-            name: "Text 1: Cơ quan & Hàng quán",
-            words: [
-              { id: "w31", zh: "图书馆", pinyin: "túshūguǎn", vi: "Thư viện" },
-              { id: "w32", zh: "医院", pinyin: "yīyuàn", vi: "Bệnh viện" },
-              { id: "w33", zh: "商店", pinyin: "shāngdiàn", vi: "Cửa hàng" },
-              { id: "w34", zh: "超市", pinyin: "chāoshì", vi: "Siêu thị" },
-              { id: "w35", zh: "奶茶店", pinyin: "nǎichádiàn", vi: "Quán trà sữa" },
-              { id: "w36", zh: "火锅店", pinyin: "huǒguōdiàn", vi: "Quán lẩu" },
-              { id: "w37", zh: "办公室", pinyin: "bàngōngshì", vi: "Phòng làm việc" },
-              { id: "w38", zh: "银行", pinyin: "yínháng", vi: "Ngân hàng" }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-];
+// ==================== 1. KHO DỮ LIỆU MẶC ĐỊNH ADMIN (TRỐNG HOÀN TOÀN ĐỂ TỰ ĐẨY VÀO) ====================
+const DEFAULT_ADMIN_CATALOG = [];
 
-// ==================== 2. ĐỒNG BỘ INTERNET ĐA GÓI TIN (CHUNKED STREAMING · ĐỒNG NHẤT 100% MỌI THIẾT BỊ) ====================
-const GLOBAL_SITE_CHANNEL = 'cvm-chinese-vocab-master-live-2026-v12';
+// ==================== 2. SUPER SYNC ENGINE v14 (ARRAY-PACKED GZIP + MULTI-CLOUD + PEER AUTO-HEAL + REALTIME) ====================
+const GLOBAL_SITE_CHANNEL = 'cvm-hsk-super-sync-2026-v16';
+const LOCAL_TAB_BC_NAME = 'cvm_instant_dual_sync_bc_v16';
 
+let firebaseDbUrl = localStorage.getItem('cvm_firebase_url') || '';
+let sharedCloudBlobId = localStorage.getItem('cvm_shared_blob_id_' + GLOBAL_SITE_CHANNEL) || '';
 let geminiApiKey = localStorage.getItem('cvm_gemini_api_key') || '';
+
+// Đọc tham số đồng bộ nhanh nếu mở từ Link chia sẻ (#sync=blobId hoặc #fb=url)
+(function parseSyncHashParams() {
+  try {
+    const h = window.location.hash || '';
+    const mBlob = h.match(/sync=([a-zA-Z0-9\-_]+)/);
+    if (mBlob && mBlob[1]) {
+      sharedCloudBlobId = mBlob[1];
+      localStorage.setItem('cvm_shared_blob_id_' + GLOBAL_SITE_CHANNEL, sharedCloudBlobId);
+    }
+    const mFb = h.match(/fb=([^&]+)/);
+    if (mFb && mFb[1]) {
+      firebaseDbUrl = decodeURIComponent(mFb[1]);
+      localStorage.setItem('cvm_firebase_url', firebaseDbUrl);
+    }
+  } catch (e) {}
+})();
+
 // Luôn yêu cầu đăng nhập bằng tài khoản & mật khẩu khi mở trang — không tự động đăng nhập Admin
 localStorage.removeItem('cvm_admin_unlocked');
 let adminUnlocked = false;
@@ -2484,20 +2710,28 @@ let currentUserId = (() => {
   }
   return savedUid;
 })();
+
 let sseSource = null;
+let sseReconnectTimer = null;
 let isSyncing = false;
 let lastPublishedFingerprint = '';
-const incomingChunkBuffers = {}; // txId -> { total, rev, v, chunks: {} }
+let lastPeerBroadcastAt = 0;
+let lastAckSentRev = 0;
+const MY_CLIENT_ID = 'cli_' + Math.random().toString(36).slice(2, 9);
+const incomingChunkBuffers = {};
+const processedTxIds = new Set();
+const instantTabChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel(LOCAL_TAB_BC_NAME) : null;
 
 function getDefaultAppState() {
   return {
     version: 1,
     catalogRevision: 1,
+    testsRevision: 1,
     catalogUpdatedAt: Date.now(),
     lastSystemUpdate: null,
     accountUpdateReceipts: {},
     generatedTests: [],
-    adminCatalog: JSON.parse(JSON.stringify(DEFAULT_ADMIN_CATALOG)),
+    adminCatalog: [],
     users: {
       guest_local: {
         uid: "guest_local",
@@ -2507,16 +2741,15 @@ function getDefaultAppState() {
         role: "student",
         totalScore: 0,
         wrongWords: [],
+        personalCatalog: [],
         personalSets: [
           {
             id: "pset_default",
             name: "Từ vựng ôn tập riêng của tôi",
-            words: [
-              { id: "pw1", zh: "努力", pinyin: "nǔlì", vi: "Nỗ lực, cố gắng" },
-              { id: "pw2", zh: "加油", pinyin: "jiāyóu", vi: "Cố lên" }
-            ]
+            words: []
           }
         ],
+        pushInboxLog: [],
         history: [],
         resumeSession: null,
         updatedAt: Date.now()
@@ -2529,7 +2762,9 @@ function getDefaultAppState() {
         role: "admin",
         totalScore: 0,
         wrongWords: [],
+        personalCatalog: [],
         personalSets: [{ id: "pset_admin", name: "Từ vựng quản trị", words: [] }],
+        pushInboxLog: [],
         history: [],
         resumeSession: null,
         updatedAt: Date.now()
@@ -2540,7 +2775,7 @@ function getDefaultAppState() {
 
 let appState = (() => {
   try {
-    const saved = JSON.parse(localStorage.getItem('cvm_app_state_v1'));
+    const saved = JSON.parse(localStorage.getItem('cvm_app_state_v16_clean'));
     if (saved && saved.adminCatalog && saved.users) return saved;
   } catch (e) {}
   return getDefaultAppState();
@@ -2569,32 +2804,117 @@ if (appState.users[currentUserId] && appState.users[currentUserId].role === 'adm
   localStorage.removeItem('cvm_current_uid');
 }
 if (typeof appState.catalogRevision !== 'number') appState.catalogRevision = 1;
+if (typeof appState.testsRevision !== 'number') appState.testsRevision = 1;
 if (!Array.isArray(appState.generatedTests)) appState.generatedTests = [];
 if (!appState.accountUpdateReceipts || typeof appState.accountUpdateReceipts !== 'object') appState.accountUpdateReceipts = {};
 
-// Đồng bộ 1 bộ từ vựng Admin duy nhất & chống trùng lặp để số liệu giữa Quản lý tài khoản, Kho cá nhân và Kho HSK khớp 100%
+function countWordsInCatalog(catalog) {
+  let c = 0;
+  (catalog || []).forEach(h => (h.lessons || []).forEach(l => (l.texts || []).forEach(t => c += (t.words || []).length)));
+  return c;
+}
+
+// Đảm bảo mỗi tài khoản đều có cây phân loại cá nhân 3 tầng HSK -> Bài -> Text giống bên Admin
+function ensureUserPersonalCatalog(userObj) {
+  if (!userObj) return [];
+  if (!Array.isArray(userObj.personalCatalog)) {
+    userObj.personalCatalog = JSON.parse(JSON.stringify(appState.adminCatalog || []));
+  }
+  return userObj.personalCatalog;
+}
+
+function countWordsInUserPersonalCatalog(userObj) {
+  if (!userObj || !Array.isArray(userObj.personalCatalog)) return 0;
+  return countWordsInCatalog(userObj.personalCatalog);
+}
+
+// Gộp (merge) đúng cấu trúc HSK -> Bài -> Text từ kho Admin vào kho cá nhân của 1 thành viên (không mất từ cũ, lọc trùng chữ Hán)
+function mergeCatalogItemsIntoUser(userObj, itemsToPush) {
+  ensureUserPersonalCatalog(userObj);
+  let totalAdded = 0;
+
+  itemsToPush.forEach(({ hskName, lessonId, lessonName, textId, textName, words }) => {
+    let hNode = userObj.personalCatalog.find(h => h.hsk === hskName);
+    if (!hNode) {
+      hNode = { hsk: hskName, lessons: [] };
+      userObj.personalCatalog.push(hNode);
+    }
+
+    let lNode = hNode.lessons.find(l => l.id === lessonId || l.name === lessonName);
+    if (!lNode) {
+      lNode = { id: lessonId || ('ml_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5)), name: lessonName, texts: [] };
+      hNode.lessons.push(lNode);
+    }
+
+    let tNode = lNode.texts.find(t => t.id === textId || t.name === textName);
+    if (!tNode) {
+      tNode = { id: textId || ('mt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5)), name: textName, words: [] };
+      lNode.texts.push(tNode);
+    }
+
+    const existZh = new Set((tNode.words || []).map(w => w.zh));
+    (words || []).forEach(w => {
+      if (w && w.zh && !existZh.has(w.zh)) {
+        existZh.add(w.zh);
+        tNode.words.push({
+          id: w.id || ('mp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6)),
+          zh: w.zh,
+          pinyin: w.pinyin || '',
+          vi: w.vi || ''
+        });
+        totalAdded++;
+      }
+    });
+  });
+
+  return totalAdded;
+}
+
+// Đồng bộ toàn bộ cấu trúc HSK -> Bài -> Text hiện tại của Admin vào personalCatalog của thành viên
+function syncAdminCatalogStructureIntoUser(userObj) {
+  if (!userObj) return 0;
+  const allItems = [];
+  (appState.adminCatalog || []).forEach(h => {
+    (h.lessons || []).forEach(l => {
+      (l.texts || []).forEach(t => {
+        allItems.push({
+          hskName: h.hsk,
+          lessonId: l.id,
+          lessonName: l.name,
+          textId: t.id,
+          textName: t.name,
+          words: t.words || []
+        });
+      });
+    });
+  });
+  return mergeCatalogItemsIntoUser(userObj, allItems);
+}
+
+// Đồng bộ 1 bộ từ vựng chuẩn xác từ kho Admin vào tài khoản (Admin & Học viên) để 2 bên luôn có cùng dữ liệu
 function syncAdminWordsToUserProfile(userObj, specificWords = null) {
+  ensureUserPersonalCatalog(userObj);
+  syncAdminCatalogStructureIntoUser(userObj);
   if (!userObj) return 0;
   if (!Array.isArray(userObj.personalSets)) userObj.personalSets = [];
 
-  // Dọn dẹp các bộ từ tự động tách lẻ cũ (pset_admin_lesson_*) để không bị nhân đôi số lượng từ
   userObj.personalSets = userObj.personalSets.filter(s => !String(s.id || '').startsWith('pset_admin_lesson_'));
 
   let masterAdminSet = userObj.personalSets.find(s => s.id === 'pset_admin_auto_master');
   if (!masterAdminSet) {
     masterAdminSet = {
       id: 'pset_admin_auto_master',
-      name: '📥 Từ vựng Admin thêm vào (Tự động nhập)',
+      name: '📥 Kho từ vựng Admin & Học viên (Đồng bộ tự động)',
       words: []
     };
     userObj.personalSets.unshift(masterAdminSet);
+  } else {
+    masterAdminSet.name = '📥 Kho từ vựng Admin & Học viên (Đồng bộ tự động)';
   }
 
-  // Xây dựng danh sách từ vựng chuẩn xác theo kho HSK hiện tại của Admin (không trùng lặp)
   const unifiedWords = [];
   const seenZh = new Set();
 
-  // Ưu tiên đưa từ mới thêm lên đầu để dễ thấy
   if (Array.isArray(specificWords)) {
     specificWords.forEach(w => {
       if (w && w.zh && !seenZh.has(w.zh)) {
@@ -2631,8 +2951,9 @@ function syncAdminWordsToUserProfile(userObj, specificWords = null) {
   return unifiedWords.length;
 }
 
-// Đồng bộ từ vựng của Admin sang TẤT CẢ tài khoản Thành viên & Quản trị viên và ghi nhận báo cáo cập nhật
+// Thêm từ vựng vào KHO ADMIN và KHO HỌC VIÊN cùng một lúc cho tất cả tài khoản trên hệ thống
 function syncAdminVocabToAllAccounts(newWords = null) {
+  ensureSystemAdminProfile();
   const nowStr = new Date().toLocaleString('vi-VN');
   const targetVer = (appState.version || 1) + 1;
 
@@ -2644,7 +2965,7 @@ function syncAdminVocabToAllAccounts(newWords = null) {
       uid: u.uid,
       name: u.name,
       email: u.email || u.uid,
-      role: isAdm ? 'Quản trị viên' : 'Thành viên',
+      role: isAdm ? 'Quản trị viên' : 'Học viên',
       syncedVersion: targetVer,
       syncedAt: nowStr,
       totalSyncedWords: count
@@ -2652,7 +2973,21 @@ function syncAdminVocabToAllAccounts(newWords = null) {
   });
 }
 
-// Tự động tạo đề kiểm tra từ vựng khi Admin tải từ vựng lên kho HSK - Bài - Text
+// Lấy danh sách từ của một đề kiểm tra đã tạo (tự lấy trực tiếp từ adminCatalog để không phải nhân bản dữ liệu)
+function getWordsForGeneratedExam(exam) {
+  if (!exam) return [];
+  if (Array.isArray(exam.words) && exam.words.length > 0) {
+    return exam.words;
+  }
+  const hObj = appState.adminCatalog?.[exam.hskIndex];
+  const lObj = hObj?.lessons?.[exam.lessonIndex];
+  const tObj = lObj?.texts?.[exam.textIndex];
+  if (tObj && Array.isArray(tObj.words) && tObj.words.length > 0) {
+    return tObj.words;
+  }
+  return [];
+}
+
 function registerAdminGeneratedExam(hIdx, lIdx, tIdx, addedWordsCount = 0) {
   const hObj = appState.adminCatalog[hIdx];
   const lObj = hObj?.lessons[lIdx];
@@ -2660,6 +2995,7 @@ function registerAdminGeneratedExam(hIdx, lIdx, tIdx, addedWordsCount = 0) {
   if (!hObj || !lObj || !tObj) return null;
 
   appState.catalogRevision = (appState.catalogRevision || 1) + 1;
+  appState.testsRevision = (appState.testsRevision || 1) + 1;
   appState.catalogUpdatedAt = Date.now();
 
   const examId = `exam_${hIdx}_${lObj.id}_${tObj.id}`;
@@ -2673,17 +3009,15 @@ function registerAdminGeneratedExam(hIdx, lIdx, tIdx, addedWordsCount = 0) {
     textIndex: tIdx,
     wordCount: tObj.words.length,
     addedWordsCount,
-    words: JSON.parse(JSON.stringify(tObj.words)),
     createdAt: new Date().toLocaleString('vi-VN'),
     createdBy: getCurrentUser().name
   };
 
   const existIdx = appState.generatedTests.findIndex(e => e.id === examId);
-  if (existIdx >= 0) {
-    appState.generatedTests.splice(existIdx, 1);
-  }
+  if (existIdx >= 0) appState.generatedTests.splice(existIdx, 1);
   appState.generatedTests.unshift(examObj);
 
+  // Thêm cùng lúc vào kho từ vựng của Admin và tất cả Học viên
   syncAdminVocabToAllAccounts(tObj.words);
 
   const totalCatalogWords = getAllAdminWordsCount();
@@ -2719,9 +3053,26 @@ function registerAdminGeneratedExam(hIdx, lIdx, tIdx, addedWordsCount = 0) {
   return examObj;
 }
 
+async function publishAdminCatalogNow() {
+  const hIdx = parseInt($('admHskSelect')?.value || '0', 10);
+  const lIdx = parseInt($('admLessonSelect')?.value || '0', 10);
+  const tIdx = parseInt($('admTextSelect')?.value || '0', 10);
+  const { tObj } = getSelectedAdminTextObj();
+  if (tObj && tObj.words.length > 0) {
+    registerAdminGeneratedExam(hIdx, lIdx, tIdx, tObj.words.length);
+  } else {
+    appState.catalogRevision = (appState.catalogRevision || 1) + 1;
+    appState.catalogUpdatedAt = Date.now();
+    syncAdminVocabToAllAccounts();
+  }
+  await pushCloudState("Admin xuất bản đồng bộ toàn hệ thống");
+  showToast(`⚡ Đã đẩy ${getAllAdminWordsCount()} từ vựng lên Internet cho cả Admin & Học viên!`);
+}
+
 function launchGeneratedExamById(examId) {
   const exam = (appState.generatedTests || []).find(e => e.id === examId);
-  if (!exam || !exam.words?.length) return alert("Đề kiểm tra này chưa có từ vựng!");
+  const examWords = getWordsForGeneratedExam(exam);
+  if (!exam || !examWords.length) return alert("Đề kiểm tra này chưa có từ vựng!");
   switchTab('tab-test');
   if ($('testSourceType')) {
     $('testSourceType').value = 'admin';
@@ -2734,8 +3085,8 @@ function launchGeneratedExamById(examId) {
   if ($('testLessonSelect') && $('testLessonSelect').querySelector(`option[value="${exam.lessonIndex}_${exam.textIndex}"]`)) {
     $('testLessonSelect').value = `${exam.lessonIndex}_${exam.textIndex}`;
   }
-  launchTestWithWords([...exam.words], exam.title, 0, 0);
-  showToast(`🎯 Đã mở "${exam.title}" (${exam.words.length} câu hỏi)!`);
+  launchTestWithWords([...examWords], exam.title, 0, 0);
+  showToast(`🎯 Đã mở "${exam.title}" (${examWords.length} câu hỏi)!`);
 }
 
 function dismissSystemUpdateBanner() {
@@ -2778,9 +3129,212 @@ function logCloudEvent(msg) {
   box.prepend(line);
 }
 
-function saveLocalState() {
-  localStorage.setItem('cvm_app_state_v1', JSON.stringify(appState));
+function setCloudProgressUI(visible, text = '', pct = 0) {
+  const wrap = $('cloudSyncProgressWrap');
+  if (!wrap) return;
+  wrap.style.display = visible ? 'block' : 'none';
+  if (visible) {
+    if ($('cloudSyncProgressText')) $('cloudSyncProgressText').textContent = text;
+    if ($('cloudSyncProgressPct')) $('cloudSyncProgressPct').textContent = `${pct}%`;
+    if ($('cloudSyncProgressFill')) $('cloudSyncProgressFill').style.width = `${pct}%`;
+  }
+}
+
+function saveLocalState(broadcastToTabs = true) {
+  try {
+    localStorage.setItem('cvm_app_state_v16_clean', JSON.stringify(appState));
+  } catch (e) {}
+  if (broadcastToTabs && instantTabChannel) {
+    try {
+      instantTabChannel.postMessage({ type: 'cvm_tab_state', from: MY_CLIENT_ID, state: appState });
+    } catch (e) {}
+  }
   refreshAllUI();
+}
+
+// Tầng 1: Đồng bộ tức thì (< 5ms) giữa các tab / cửa sổ trình duyệt trên cùng máy
+if (instantTabChannel) {
+  instantTabChannel.onmessage = (ev) => {
+    if (ev.data && ev.data.type === 'cvm_tab_state' && ev.data.from !== MY_CLIENT_ID && ev.data.state) {
+      mergeCloudState(ev.data.state, false);
+    }
+  };
+}
+window.addEventListener('storage', (e) => {
+  if (e.key === 'cvm_app_state_v16_clean' && e.newValue) {
+    try {
+      mergeCloudState(JSON.parse(e.newValue), false);
+    } catch (err) {}
+  }
+});
+
+// ==================== ĐÓNG GÓI SIÊU GỌN (ARRAY-PACKED + GZIP) GIẢM >92% DUNG LƯỢNG ====================
+function packAdminCatalog(catalog) {
+  return (catalog || []).map(h => [
+    h.hsk,
+    (h.lessons || []).map(l => [
+      l.id,
+      l.name,
+      (l.texts || []).map(t => [
+        t.id,
+        t.name,
+        (t.words || []).map(w => [w.zh, w.pinyin || '', w.vi || ''])
+      ])
+    ])
+  ]);
+}
+
+function unpackAdminCatalog(packed) {
+  if (!Array.isArray(packed)) return [];
+  if (packed.length > 0 && !Array.isArray(packed[0])) return packed; // Đã ở dạng object chuẩn
+  return packed.map((h, hi) => ({
+    hsk: h[0],
+    lessons: (h[1] || []).map((l, li) => ({
+      id: l[0],
+      name: l[1],
+      texts: (l[2] || []).map((t, ti) => ({
+        id: t[0],
+        name: t[1],
+        words: (t[2] || []).map((w, wi) => ({
+          id: `w_${hi}_${li}_${ti}_${wi}`,
+          zh: w[0],
+          pinyin: w[1] || '',
+          vi: w[2] || ''
+        }))
+      }))
+    }))
+  }));
+}
+
+function buildCompactCloudPayload() {
+  const slimUsers = {};
+  for (const [uid, u] of Object.entries(appState.users || {})) {
+    const customSets = (u.personalSets || [])
+      .filter(s => s.id !== 'pset_admin_auto_master' && !String(s.id || '').startsWith('pset_admin_lesson_'))
+      .map(s => ({
+        id: s.id,
+        name: s.name,
+        words: (s.words || []).map(w => [w.zh, w.pinyin || '', w.vi || ''])
+      }));
+    slimUsers[uid] = {
+      uid: u.uid,
+      name: u.name,
+      email: u.email || '',
+      passwordHash: u.passwordHash || '',
+      provider: u.provider || 'local',
+      role: u.role || 'student',
+      totalScore: u.totalScore || 0,
+      wrongWords: (u.wrongWords || []).map(w => [w.zh, w.pinyin || '', w.vi || '']),
+      personalSets: customSets,
+      pcat: packAdminCatalog(u.personalCatalog || []),
+      pushInboxLog: (u.pushInboxLog || []).slice(0, 8),
+      history: (u.history || []).slice(0, 25),
+      updatedAt: u.updatedAt || 0
+    };
+  }
+  const slimTests = (appState.generatedTests || []).slice(0, 25).map(ex => ({
+    id: ex.id,
+    title: ex.title,
+    pathLabel: ex.pathLabel || '',
+    sourceType: ex.sourceType || 'admin',
+    hskIndex: ex.hskIndex,
+    lessonIndex: ex.lessonIndex,
+    textIndex: ex.textIndex,
+    wordCount: ex.wordCount || (ex.words ? ex.words.length : 0),
+    addedWordsCount: ex.addedWordsCount || 0,
+    w: Array.isArray(ex.words) ? ex.words.map(item => [item.zh, item.pinyin || '', item.vi || '']) : null,
+    createdAt: ex.createdAt,
+    createdBy: ex.createdBy
+  }));
+  return {
+    fmt: 2,
+    v: appState.version || 1,
+    rev: appState.catalogRevision || 1,
+    tRev: appState.testsRevision || 1,
+    catAt: appState.catalogUpdatedAt || 0,
+    pcat: packAdminCatalog(appState.adminCatalog),
+    tests: slimTests,
+    lastUpd: appState.lastSystemUpdate || null,
+    receipts: appState.accountUpdateReceipts || {},
+    users: slimUsers
+  };
+}
+
+function unpackCloudPayload(pkt) {
+  if (!pkt || typeof pkt !== 'object') return null;
+  if (pkt.adminCatalog) return pkt;
+  const unpackedUsers = {};
+  for (const [uid, u] of Object.entries(pkt.users || {})) {
+    const unpackWords = arr => (arr || []).map((w, idx) => Array.isArray(w)
+      ? { id: `uw_${idx}`, zh: w[0], pinyin: w[1] || '', vi: w[2] || '' }
+      : w
+    );
+    unpackedUsers[uid] = {
+      ...u,
+      wrongWords: unpackWords(u.wrongWords),
+      personalSets: (u.personalSets || []).map(s => ({
+        id: s.id,
+        name: s.name,
+        words: unpackWords(s.words)
+      })),
+      personalCatalog: u.pcat ? unpackAdminCatalog(u.pcat) : (u.personalCatalog || []),
+      pushInboxLog: Array.isArray(u.pushInboxLog) ? u.pushInboxLog : [],
+      resumeSession: appState.users?.[uid]?.resumeSession || null
+    };
+  }
+  const unpackedTests = (pkt.tests || []).map(ex => ({
+    ...ex,
+    words: Array.isArray(ex.w)
+      ? ex.w.map((item, wi) => ({ id: `tw_${wi}`, zh: item[0], pinyin: item[1] || '', vi: item[2] || '' }))
+      : (Array.isArray(ex.words) ? ex.words : undefined)
+  }));
+  return {
+    version: pkt.v || 1,
+    catalogRevision: pkt.rev || 1,
+    testsRevision: pkt.tRev || pkt.testsRevision || 1,
+    catalogUpdatedAt: pkt.catAt || 0,
+    adminCatalog: pkt.pcat ? unpackAdminCatalog(pkt.pcat) : (pkt.cat || []),
+    generatedTests: unpackedTests,
+    lastSystemUpdate: pkt.lastUpd || null,
+    accountUpdateReceipts: pkt.receipts || {},
+    users: unpackedUsers
+  };
+}
+
+function computeStateFingerprint() {
+  return `${appState.catalogRevision || 1}_${appState.testsRevision || 1}_${(appState.generatedTests || []).length}_${getAllAdminWordsCount()}_${Object.keys(appState.users || {}).length}_${getCurrentUser().totalScore || 0}_${(getCurrentUser().wrongWords || []).length}_${(getCurrentUser().history || []).length}`;
+}
+
+async function compressStringToBase64(str) {
+  if (typeof CompressionStream === 'undefined') return { enc: 'raw', data: str };
+  try {
+    const cs = new CompressionStream('gzip');
+    const writer = cs.writable.getWriter();
+    writer.write(new TextEncoder().encode(str));
+    writer.close();
+    const buf = await new Response(cs.readable).arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 8192) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+    }
+    return { enc: 'gzip_b64', data: btoa(bin) };
+  } catch (e) {
+    return { enc: 'raw', data: str };
+  }
+}
+
+async function decompressPayloadToString(enc, data) {
+  if (enc !== 'gzip_b64' || typeof DecompressionStream === 'undefined') return data;
+  const bin = atob(data);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const ds = new DecompressionStream('gzip');
+  const writer = ds.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  const outBuf = await new Response(ds.readable).arrayBuffer();
+  return new TextDecoder().decode(outBuf);
 }
 
 function mergeUserHistory(localHist = [], remoteHist = []) {
@@ -2793,7 +3347,7 @@ function mergeUserHistory(localHist = [], remoteHist = []) {
   return Array.from(map.values()).slice(0, 50);
 }
 
-function mergeCloudState(remote) {
+function mergeCloudState(remote, rebroadcast = true) {
   if (!remote || typeof remote !== 'object') return false;
   let changed = false;
   let catalogUpdated = false;
@@ -2802,8 +3356,17 @@ function mergeCloudState(remote) {
   const localRev = appState.catalogRevision || 1;
   const remoteCatAt = remote.catalogUpdatedAt || 0;
   const localCatAt = appState.catalogUpdatedAt || 0;
+  const remoteWordTotal = countWordsInCatalog(remote.adminCatalog);
+  const localWordTotal = getAllAdminWordsCount();
 
-  if (Array.isArray(remote.adminCatalog) && (remoteRev > localRev || (remoteRev === localRev && remoteCatAt > localCatAt))) {
+  // Hỗ trợ đồng bộ cả khi cập nhật mới lẫn khi Admin chủ động xóa mục / xóa trắng (catalogRevision cao hơn)
+  const shouldTakeCatalog = Array.isArray(remote.adminCatalog) && (
+    remoteRev > localRev ||
+    (remoteRev === localRev && remoteWordTotal > localWordTotal) ||
+    (remoteRev === localRev && remoteWordTotal === localWordTotal && remoteCatAt > localCatAt)
+  );
+
+  if (shouldTakeCatalog) {
     appState.adminCatalog = remote.adminCatalog;
     appState.catalogRevision = remoteRev;
     appState.catalogUpdatedAt = remoteCatAt;
@@ -2811,11 +3374,14 @@ function mergeCloudState(remote) {
     catalogUpdated = true;
   }
 
-  if (Array.isArray(remote.generatedTests) && remote.generatedTests.length > 0) {
-    const localFirstId = appState.generatedTests?.[0]?.id || '';
-    const localFirstCount = appState.generatedTests?.[0]?.wordCount || 0;
-    const remFirst = remote.generatedTests[0];
-    if (catalogUpdated || remFirst.id !== localFirstId || remFirst.wordCount !== localFirstCount || remote.generatedTests.length > appState.generatedTests.length) {
+  const remoteTestsRev = remote.testsRevision || 1;
+  const localTestsRev = appState.testsRevision || 1;
+  if (Array.isArray(remote.generatedTests)) {
+    if (remoteTestsRev > localTestsRev) {
+      appState.generatedTests = remote.generatedTests;
+      appState.testsRevision = remoteTestsRev;
+      changed = true;
+    } else if (remoteTestsRev === localTestsRev && remote.generatedTests.length > (appState.generatedTests || []).length) {
       appState.generatedTests = remote.generatedTests;
       changed = true;
     }
@@ -2833,7 +3399,7 @@ function mergeCloudState(remote) {
   if (remote.accountUpdateReceipts && typeof remote.accountUpdateReceipts === 'object') {
     for (const [uid, rec] of Object.entries(remote.accountUpdateReceipts)) {
       const localRec = appState.accountUpdateReceipts[uid];
-      if (!localRec || (rec.syncedVersion || 0) > (localRec.syncedVersion || 0)) {
+      if (!localRec || (rec.syncedVersion || 0) > (localRec.syncedVersion || 0) || (rec.totalSyncedWords || 0) > (localRec.totalSyncedWords || 0)) {
         appState.accountUpdateReceipts[uid] = rec;
         changed = true;
       }
@@ -2859,7 +3425,8 @@ function mergeCloudState(remote) {
           appState.users[uid] = {
             ...rUser,
             totalScore: mergedScore,
-            history: mergedHistory
+            history: mergedHistory,
+            resumeSession: lUser.resumeSession || rUser.resumeSession || null
           };
           changed = true;
         } else if (mergedScore !== (lUser.totalScore || 0) || mergedHistory.length !== (lUser.history || []).length) {
@@ -2885,7 +3452,7 @@ function mergeCloudState(remote) {
           uid: u.uid,
           name: u.name,
           email: u.email || u.uid,
-          role: isAdm ? 'Quản trị viên' : 'Thành viên',
+          role: isAdm ? 'Quản trị viên' : 'Học viên',
           syncedVersion: appState.version,
           syncedAt: new Date().toLocaleString('vi-VN'),
           totalSyncedWords: count
@@ -2904,7 +3471,7 @@ function mergeCloudState(remote) {
       uid: curUser.uid,
       name: curUser.name,
       email: curUser.email || curUser.uid,
-      role: isAdm ? 'Quản trị viên' : 'Thành viên',
+      role: isAdm ? 'Quản trị viên' : 'Học viên',
       syncedVersion: appState.version,
       syncedAt: nowStr,
       totalSyncedWords: masterSet ? masterSet.words.length : 0
@@ -2912,163 +3479,349 @@ function mergeCloudState(remote) {
 
     if (catalogUpdated) {
       const latestExam = appState.generatedTests?.[0];
-      if (latestExam && latestExam.words?.length) {
-        launchTestWithWords([...latestExam.words], latestExam.title, 0, 0);
+      const latestWords = getWordsForGeneratedExam(latestExam);
+      if (latestExam && latestWords.length) {
+        launchTestWithWords([...latestWords], latestExam.title, 0, 0);
       }
-      showToast(`🔔 ĐÃ ĐỒNG BỘ DỮ LIỆU MỚI (${getAllAdminWordsCount()} từ)! Tài khoản "${curUser.name}" đã cập nhật.`);
-      logCloudEvent(`✅ Tài khoản [${curUser.name} - ${isAdm ? 'Quản trị viên' : 'Thành viên'}] đã nhận ${getAllAdminWordsCount()} từ vựng & đề kiểm tra mới!`);
+      showToast(`🔔 ĐÃ ĐỒNG BỘ DỮ LIỆU MỚI (${getAllAdminWordsCount()} từ)! Kho Admin & Học viên đã đồng nhất.`);
+      logCloudEvent(`✅ Tài khoản [${curUser.name}] đã nhận ${getAllAdminWordsCount()} từ vựng & đề kiểm tra mới (Rev ${appState.catalogRevision})!`);
+
+      // Gửi biên lai xác nhận siêu nhẹ (< 200 bytes) lên kênh chung để Admin thấy ngay tài khoản này đã cập nhật
+      if (lastAckSentRev < appState.catalogRevision && navigator.onLine) {
+        lastAckSentRev = appState.catalogRevision;
+        sendLightSignalPacket({
+          t: 'cvm_ack',
+          from: MY_CLIENT_ID,
+          uid: curUser.uid,
+          name: curUser.name,
+          email: curUser.email || curUser.uid,
+          role: isAdm ? 'Quản trị viên' : 'Học viên',
+          rev: appState.catalogRevision,
+          v: appState.version,
+          words: masterSet ? masterSet.words.length : getAllAdminWordsCount(),
+          at: nowStr
+        });
+      }
     }
 
     lastPublishedFingerprint = computeStateFingerprint();
-    saveLocalState();
+    saveLocalState(rebroadcast);
   }
   return changed;
 }
 
-// Đóng gói dữ liệu gọn nhẹ để truyền qua mạng (loại bỏ bản sao tự động vì máy nhận tự tái tạo)
-function buildCompactCloudPayload() {
-  const slimUsers = {};
-  for (const [uid, u] of Object.entries(appState.users || {})) {
-    slimUsers[uid] = {
-      ...u,
-      personalSets: (u.personalSets || []).filter(s => s.id !== 'pset_admin_auto_master' && !String(s.id || '').startsWith('pset_admin_lesson_'))
-    };
-  }
-  return {
-    v: appState.version || 1,
-    rev: appState.catalogRevision || 1,
-    catAt: appState.catalogUpdatedAt || 0,
-    cat: appState.adminCatalog,
-    tests: (appState.generatedTests || []).slice(0, 12),
-    lastUpd: appState.lastSystemUpdate || null,
-    receipts: appState.accountUpdateReceipts || {},
-    users: slimUsers
-  };
+function sendLightSignalPacket(obj) {
+  if (!navigator.onLine) return;
+  fetch(`https://ntfy.sh/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}`, {
+    method: 'POST',
+    headers: { 'Title': obj.t || 'cvm-sig', 'Cache': 'yes' },
+    body: JSON.stringify(obj)
+  }).catch(() => {});
 }
 
-function computeStateFingerprint() {
-  return `${appState.catalogRevision || 1}_${getAllAdminWordsCount()}_${Object.keys(appState.users || {}).length}_${getCurrentUser().totalScore || 0}_${(getCurrentUser().wrongWords || []).length}_${(getCurrentUser().history || []).length}`;
-}
-
-function applyCloudPayload(pkt) {
-  if (!pkt || typeof pkt !== 'object') return false;
-  const normalized = pkt.adminCatalog ? pkt : {
-    version: pkt.v || 1,
-    catalogRevision: pkt.rev || 1,
-    catalogUpdatedAt: pkt.catAt || 0,
-    adminCatalog: pkt.cat,
-    generatedTests: pkt.tests || [],
-    lastSystemUpdate: pkt.lastUpd || null,
-    accountUpdateReceipts: pkt.receipts || {},
-    users: pkt.users
-  };
-  return mergeCloudState(normalized);
-}
-
-// Xử lý nhận từng mảnh gói tin (chunk) và ghép lại thành bản hoàn chỉnh
-function ingestIncomingChunk(chunkObj) {
-  if (!chunkObj || chunkObj.t !== 'cvm_chunk' || !chunkObj.tx) return false;
-  const { tx, idx, total, rev, v, data } = chunkObj;
-  if (!incomingChunkBuffers[tx]) {
-    incomingChunkBuffers[tx] = { total, rev: rev || 1, v: v || 1, chunks: {} };
-  }
-  const buf = incomingChunkBuffers[tx];
-  buf.chunks[idx] = data;
-
-  if (Object.keys(buf.chunks).length === buf.total) {
-    let fullStr = '';
-    for (let i = 0; i < buf.total; i++) {
-      if (typeof buf.chunks[i] !== 'string') return false;
-      fullStr += buf.chunks[i];
+// Đọc dữ liệu từ JSONBlob (nếu có blobId)
+async function fetchFromJsonBlob(blobId) {
+  if (!blobId) return null;
+  try {
+    const res = await fetch(`https://jsonblob.com/api/jsonBlob/${encodeURIComponent(blobId)}?t=${Date.now()}`, {
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    if (res && res.ok) {
+      const data = await res.json();
+      if (data && (data.pcat || data.cat || data.adminCatalog)) {
+        sharedCloudBlobId = blobId;
+        localStorage.setItem('cvm_shared_blob_id_' + GLOBAL_SITE_CHANNEL, blobId);
+        return data;
+      }
     }
-    delete incomingChunkBuffers[tx];
-    try {
-      const parsedPayload = JSON.parse(fullStr);
-      return applyCloudPayload(parsedPayload);
-    } catch (e) {}
+  } catch (e) {}
+  return null;
+}
+
+async function ingestSignalOrChunk(parsed) {
+  if (!parsed || typeof parsed !== 'object') return false;
+  if (parsed.from && parsed.from === MY_CLIENT_ID) return false;
+
+  // 1) Biên lai xác nhận cập nhật từ tài khoản thành viên khác
+  if (parsed.t === 'cvm_ack' && parsed.uid) {
+    const existing = appState.accountUpdateReceipts[parsed.uid];
+    if (!existing || (parsed.v || 0) >= (existing.syncedVersion || 0)) {
+      appState.accountUpdateReceipts[parsed.uid] = {
+        uid: parsed.uid,
+        name: parsed.name,
+        email: parsed.email || parsed.uid,
+        role: parsed.role || 'Học viên',
+        syncedVersion: parsed.v || appState.version,
+        syncedAt: parsed.at || new Date().toLocaleString('vi-VN'),
+        totalSyncedWords: parsed.words || getAllAdminWordsCount()
+      };
+      if (!appState.users[parsed.uid]) {
+        appState.users[parsed.uid] = {
+          uid: parsed.uid,
+          name: parsed.name,
+          email: parsed.email || '',
+          provider: 'cloud',
+          role: parsed.role === 'Quản trị viên' ? 'admin' : 'student',
+          totalScore: 0,
+          wrongWords: [],
+          personalSets: [],
+          history: [],
+          resumeSession: null,
+          updatedAt: Date.now()
+        };
+        syncAdminWordsToUserProfile(appState.users[parsed.uid]);
+      }
+      logCloudEvent(`📋 Xác nhận: Tài khoản "${parsed.name}" (${parsed.role}) đã cập nhật đủ ${parsed.words} từ!`);
+      saveLocalState(false);
+      return true;
+    }
+    return false;
   }
+
+  // 2) Yêu cầu đồng bộ từ một máy mới vào (Peer Auto-Heal)
+  if (parsed.t === 'cvm_req') {
+    const peerRev = parsed.rev || 1;
+    const peerWords = parsed.words || 0;
+    const myRev = appState.catalogRevision || 1;
+    const myWords = getAllAdminWordsCount();
+    const now = Date.now();
+    if ((myRev > peerRev || myWords > peerWords) && (now - lastPeerBroadcastAt > 8000) && !isSyncing) {
+      lastPeerBroadcastAt = now;
+      logCloudEvent(`🤝 Phát hiện thiết bị mới cần dữ liệu (${peerWords} từ < ${myWords} từ) ➔ Tự động phát bản mới nhất!`);
+      pushCloudState("Tự động gửi bản mới cho thiết bị vừa kết nối");
+    }
+    return false;
+  }
+
+  // 3) Gói dữ liệu nén (1 gói hoặc đa gói)
+  if (parsed.t === 'cvm_chunk' && parsed.tx) {
+    if (processedTxIds.has(parsed.tx)) return false;
+    if (parsed.blobId && parsed.blobId !== sharedCloudBlobId) {
+      sharedCloudBlobId = parsed.blobId;
+      localStorage.setItem('cvm_shared_blob_id_' + GLOBAL_SITE_CHANNEL, parsed.blobId);
+    }
+    if (!incomingChunkBuffers[parsed.tx]) {
+      incomingChunkBuffers[parsed.tx] = {
+        total: parsed.total,
+        rev: parsed.rev || 1,
+        v: parsed.v || 1,
+        enc: parsed.enc || 'raw',
+        chunks: {}
+      };
+    }
+    const buf = incomingChunkBuffers[parsed.tx];
+    buf.chunks[parsed.idx] = parsed.data;
+
+    if (Object.keys(buf.chunks).length === buf.total) {
+      let joined = '';
+      for (let i = 0; i < buf.total; i++) {
+        if (typeof buf.chunks[i] !== 'string') return false;
+        joined += buf.chunks[i];
+      }
+      const encoding = buf.enc;
+      processedTxIds.add(parsed.tx);
+      delete incomingChunkBuffers[parsed.tx];
+      try {
+        const fullJsonStr = await decompressPayloadToString(encoding, joined);
+        const unpacked = unpackCloudPayload(JSON.parse(fullJsonStr));
+        return mergeCloudState(unpacked, true);
+      } catch (e) {}
+    }
+    return false;
+  }
+
+  // 4) Con trỏ tới JSONBlob
+  if (parsed.t === 'cvm_ptr' && parsed.blobId) {
+    const data = await fetchFromJsonBlob(parsed.blobId);
+    if (data) return mergeCloudState(unpackCloudPayload(data), true);
+  }
+
   return false;
 }
 
-// Xuất bản dữ liệu theo cơ chế chia nhỏ gói tin (mỗi gói < 2.8 KB) lên kênh ntfy.sh để truyền không giới hạn dung lượng
+// Đẩy dữ liệu đồng bộ đa tầng: BroadcastChannel + Firebase (nếu có) + JSONBlob + Gzipped ntfy.sh
 async function pushCloudState(reason = "Cập nhật dữ liệu") {
   const user = getCurrentUser();
   user.updatedAt = Date.now();
   appState.version = (appState.version || 1) + 1;
   lastPublishedFingerprint = computeStateFingerprint();
-  saveLocalState();
+  saveLocalState(true);
 
   if (!navigator.onLine) {
     $('cloudDot').className = 'net-dot offline';
     $('cloudStatusLabel').textContent = 'Offline · Đã lưu máy';
-    return;
+    return false;
   }
 
   isSyncing = true;
   $('cloudDot').className = 'net-dot syncing';
   $('cloudStatusLabel').textContent = 'Đang đồng bộ...';
+  setCloudProgressUI(true, `⚡ Đang đóng gói & nén dữ liệu (${getAllAdminWordsCount()} từ)...`, 15);
 
   try {
-    const fullJsonStr = JSON.stringify(buildCompactCloudPayload());
-    const CHUNK_SIZE = 2800; // Luôn nhỏ hơn giới hạn 4096 bytes của ntfy.sh
-    const totalChunks = Math.max(1, Math.ceil(fullJsonStr.length / CHUNK_SIZE));
-    const txId = 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    const compactObj = buildCompactCloudPayload();
+    const rawJsonStr = JSON.stringify(compactObj);
+    const compressed = await compressStringToBase64(rawJsonStr);
 
-    let allOk = true;
+    const rawKB = (rawJsonStr.length / 1024).toFixed(1);
+    const compKB = (compressed.data.length / 1024).toFixed(1);
+    if ($('cloudDiagPayloadSize')) $('cloudDiagPayloadSize').textContent = `${compKB} KB (Gốc ${rawKB} KB)`;
+
+    let mirrorStatus = [];
+    let anySuccess = false;
+
+    // Tầng A: Firebase Realtime Database (nếu người dùng đã cấu hình)
+    if (firebaseDbUrl) {
+      setCloudProgressUI(true, '🔥 Đang lưu lên Firebase Realtime Database...', 35);
+      const cleanFb = firebaseDbUrl.replace(/\/$/, '');
+      const fbRes = await fetch(`${cleanFb}/cvm_super_sync/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: rawJsonStr
+      }).catch(() => null);
+      if (fbRes && fbRes.ok) {
+        mirrorStatus.push('Firebase OK');
+        anySuccess = true;
+      }
+    }
+
+    // Tầng B: JSONBlob Persistent Cloud Storage
+    setCloudProgressUI(true, '☁️ Đang lưu kho lưu trữ đám mây (JSONBlob)...', 50);
+    let blobSaved = false;
+    if (sharedCloudBlobId) {
+      const putRes = await fetch(`https://jsonblob.com/api/jsonBlob/${encodeURIComponent(sharedCloudBlobId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: rawJsonStr
+      }).catch(() => null);
+      if (putRes && putRes.ok) blobSaved = true;
+      else sharedCloudBlobId = '';
+    }
+    if (!sharedCloudBlobId) {
+      const postRes = await fetch('https://jsonblob.com/api/jsonBlob', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: rawJsonStr
+      }).catch(() => null);
+      if (postRes && postRes.ok) {
+        const loc = postRes.headers.get('Location') || postRes.headers.get('X-jsonblob') || '';
+        const newId = loc.split('/').pop();
+        if (newId) {
+          sharedCloudBlobId = newId;
+          localStorage.setItem('cvm_shared_blob_id_' + GLOBAL_SITE_CHANNEL, newId);
+          blobSaved = true;
+        }
+      }
+    }
+    if (blobSaved) {
+      mirrorStatus.push('JSONBlob OK');
+      anySuccess = true;
+    }
+
+    // Tầng C: Phát sóng Real-time nén Gzip qua ntfy.sh (mỗi gói <= 2.9 KB, tự thử lại nếu lỗi tạm thời)
+    const CHUNK_SIZE = 2900;
+    const totalChunks = Math.max(1, Math.ceil(compressed.data.length / CHUNK_SIZE));
+    const txId = 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    processedTxIds.add(txId);
+
+    let chunksSent = 0;
     for (let i = 0; i < totalChunks; i++) {
-      const sliceData = fullJsonStr.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+      const sliceData = compressed.data.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
       const packet = JSON.stringify({
         t: 'cvm_chunk',
+        from: MY_CLIENT_ID,
         tx: txId,
         idx: i,
         total: totalChunks,
         rev: appState.catalogRevision || 1,
         v: appState.version,
+        enc: compressed.enc,
+        blobId: sharedCloudBlobId || '',
         data: sliceData
       });
 
-      const res = await fetch(`https://ntfy.sh/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}`, {
-        method: 'POST',
-        headers: {
-          'Title': `cvm-${txId}-${i + 1}/${totalChunks}`,
-          'Cache': 'yes'
-        },
-        body: packet
-      }).catch(() => null);
+      const pct = Math.min(95, 55 + Math.round(((i + 1) / totalChunks) * 40));
+      setCloudProgressUI(true, `📡 Đang phát gói ${i + 1}/${totalChunks} (${compKB} KB Gzip)...`, pct);
 
-      if (!res || !res.ok) {
-        allOk = false;
-        break;
+      let sentThis = false;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await fetch(`https://ntfy.sh/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}`, {
+          method: 'POST',
+          headers: {
+            'Title': `cvm-${txId}-${i + 1}/${totalChunks}`,
+            'Cache': 'yes'
+          },
+          body: packet
+        }).catch(() => null);
+        if (res && res.ok) {
+          sentThis = true;
+          break;
+        }
+        await new Promise(r => setTimeout(r, 350));
       }
+      if (sentThis) chunksSent++;
+      if (i + 1 < totalChunks) await new Promise(r => setTimeout(r, 150));
     }
 
-    if (allOk) {
+    if (chunksSent === totalChunks) {
+      mirrorStatus.push(`Push ${totalChunks} gói OK`);
+      anySuccess = true;
+    }
+
+    if (anySuccess) {
+      setCloudProgressUI(true, `✅ Đồng bộ hoàn tất! (${mirrorStatus.join(' · ')})`, 100);
+      setTimeout(() => setCloudProgressUI(false), 1800);
       $('cloudDot').className = 'net-dot';
       $('cloudStatusLabel').textContent = `Đã đồng bộ · v${appState.version}`;
-      if ($('cloudDiagVersion')) $('cloudDiagVersion').textContent = `v${appState.version} (${getAllAdminWordsCount()} từ)`;
+      if ($('cloudDiagVersion')) $('cloudDiagVersion').textContent = `v${appState.version} · ${getAllAdminWordsCount()} từ`;
+      if ($('cloudDiagMirror')) $('cloudDiagMirror').textContent = `● ${mirrorStatus.join(' + ')}`;
       if ($('cloudDiagTime')) $('cloudDiagTime').textContent = new Date().toLocaleTimeString('vi-VN');
-      logCloudEvent(`✓ Đã xuất bản lên Internet (${reason}) -> v${appState.version} · ${getAllAdminWordsCount()} từ (${totalChunks} gói)`);
+      if ($('cloudOverallHealthBadge')) $('cloudOverallHealthBadge').textContent = `✓ Đã đồng bộ (${compKB} KB)`;
+      logCloudEvent(`✓ Đẩy thành công (${reason}) -> v${appState.version} · ${getAllAdminWordsCount()} từ · ${compKB} KB (${mirrorStatus.join(', ')})`);
+      return true;
     } else {
-      throw new Error("Không gửi đủ gói tin lên máy chủ đồng bộ");
+      throw new Error("Tất cả kênh Cloud đều không phản hồi (kiểm tra tường lửa / mạng)");
     }
   } catch (err) {
+    setCloudProgressUI(false);
     $('cloudDot').className = 'net-dot offline';
-    $('cloudStatusLabel').textContent = 'Lỗi đồng bộ mạng';
+    $('cloudStatusLabel').textContent = 'Lỗi đồng bộ';
+    if ($('cloudOverallHealthBadge')) $('cloudOverallHealthBadge').textContent = '⚠ Lỗi kết nối Cloud';
     logCloudEvent(`⚠ Lỗi đẩy Cloud: ${err.message}`);
+    return false;
   } finally {
     isSyncing = false;
   }
 }
 
-async function pullCloudState(silent = true) {
-  if (!navigator.onLine || isSyncing) return;
+async function pullCloudState(silent = true, requestPeersIfEmpty = false) {
+  if (!navigator.onLine || isSyncing) return false;
   try {
-    const ntfyRes = await fetch(`https://ntfy.sh/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}/json?poll=1&since=24h`, {
+    let anyUpdated = false;
+    let foundRemote = false;
+
+    if (!silent) setCloudProgressUI(true, '🔍 Đang kiểm tra bản cập nhật mới nhất trên Internet...', 30);
+
+    // 1. Kiểm tra Firebase Realtime Database (nếu đã cấu hình)
+    if (firebaseDbUrl) {
+      const cleanFb = firebaseDbUrl.replace(/\/$/, '');
+      const fbRes = await fetch(`${cleanFb}/cvm_super_sync/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}.json?t=${Date.now()}`, {
+        cache: 'no-store'
+      }).catch(() => null);
+      if (fbRes && fbRes.ok) {
+        const fbData = await fbRes.json();
+        if (fbData) {
+          foundRemote = true;
+          if (mergeCloudState(unpackCloudPayload(fbData), true)) anyUpdated = true;
+        }
+      }
+    }
+
+    // 2. Kiểm tra kênh phát sóng toàn cầu ntfy.sh (lấy toàn bộ lịch sử cache)
+    const ntfyRes = await fetch(`https://ntfy.sh/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}/json?poll=1&since=all`, {
       cache: 'no-store'
     }).catch(() => null);
-
-    let anyUpdated = false;
-    let serverHasData = false;
 
     if (ntfyRes && ntfyRes.ok) {
       const rawBody = await ntfyRes.text();
@@ -3078,64 +3831,95 @@ async function pullCloudState(silent = true) {
           const ev = JSON.parse(lines[i]);
           if (ev.message && ev.message.trim().startsWith('{')) {
             const parsed = JSON.parse(ev.message);
-            if (parsed.t === 'cvm_chunk') {
-              serverHasData = true;
-              if (ingestIncomingChunk(parsed)) anyUpdated = true;
+            if (parsed.t === 'cvm_chunk' || parsed.t === 'cvm_ptr' || parsed.t === 'cvm_ack') {
+              foundRemote = true;
+              if (await ingestSignalOrChunk(parsed)) anyUpdated = true;
             }
           }
         } catch (e) {}
       }
     }
 
+    // 3. Nếu đã biết sharedCloudBlobId mà chưa có bản mới hơn -> tải thẳng từ JSONBlob
+    if (sharedCloudBlobId && !anyUpdated) {
+      const blobData = await fetchFromJsonBlob(sharedCloudBlobId);
+      if (blobData) {
+        foundRemote = true;
+        if (mergeCloudState(unpackCloudPayload(blobData), true)) anyUpdated = true;
+      }
+    }
+
+    // 4. Nếu máy chủ chưa có gói nào (hoặc người dùng bấm Kéo thủ công) -> gửi tín hiệu hỏi các máy đang online (Auto-Heal)
+    if ((!foundRemote || requestPeersIfEmpty) && navigator.onLine) {
+      sendLightSignalPacket({
+        t: 'cvm_req',
+        from: MY_CLIENT_ID,
+        rev: appState.catalogRevision || 1,
+        v: appState.version || 1,
+        words: getAllAdminWordsCount()
+      });
+    }
+
     $('cloudDot').className = 'net-dot';
     $('cloudStatusLabel').textContent = `Đã đồng bộ · v${appState.version}`;
-    if ($('cloudDiagVersion')) $('cloudDiagVersion').textContent = `v${appState.version} (${getAllAdminWordsCount()} từ)`;
+    if ($('cloudDiagVersion')) $('cloudDiagVersion').textContent = `v${appState.version} · ${getAllAdminWordsCount()} từ`;
     if ($('cloudDiagTime')) $('cloudDiagTime').textContent = new Date().toLocaleTimeString('vi-VN');
 
-    if (!silent && !anyUpdated) {
-      showToast(`✓ Dữ liệu đã đồng nhất mới nhất (v${appState.version} · ${getAllAdminWordsCount()} từ)!`);
+    if (!silent) {
+      setCloudProgressUI(true, anyUpdated ? `✅ Đã cập nhật dữ liệu mới (${getAllAdminWordsCount()} từ)!` : `✓ Đang ở bản mới nhất (${getAllAdminWordsCount()} từ)!`, 100);
+      setTimeout(() => setCloudProgressUI(false), 1600);
+      if (!anyUpdated) showToast(`✓ Đã kiểm tra xong! Hiện tại có ${getAllAdminWordsCount()} từ (v${appState.version}).`);
     }
 
-    // Chỉ đẩy lên máy chủ nếu máy chủ chưa có dữ liệu HOẶC dữ liệu cục bộ vừa thay đổi mà chưa đẩy
+    // Nếu máy chủ trống nhưng máy hiện tại đã có kho từ Admin nhiều hơn mặc định -> tự động đẩy lên Cloud
     const curFp = computeStateFingerprint();
-    if (!serverHasData && ((appState.catalogRevision || 1) > 1 || Object.keys(appState.users || {}).length > 2) && lastPublishedFingerprint !== curFp) {
-      pushCloudState("Đồng bộ dữ liệu lên máy chủ web");
+    if (!foundRemote && ((appState.catalogRevision || 1) > 1 || (appState.testsRevision || 1) > 1 || getAllAdminWordsCount() > 0 || (appState.generatedTests || []).length > 0) && lastPublishedFingerprint !== curFp) {
+      pushCloudState("Tự động khởi tạo kho dữ liệu lên Cloud");
     }
-  } catch (e) {}
+
+    return anyUpdated;
+  } catch (e) {
+    if (!silent) setCloudProgressUI(false);
+    return false;
+  }
 }
 
 function startRealtimePushListener() {
-  if (sseSource) { try { sseSource.close(); } catch (e) {} }
+  if (sseSource) { try { sseSource.close(); } catch (e) {} sseSource = null; }
+  if (sseReconnectTimer) { clearTimeout(sseReconnectTimer); sseReconnectTimer = null; }
   if (!navigator.onLine || typeof EventSource === 'undefined') return;
+
   try {
     sseSource = new EventSource(`https://ntfy.sh/${encodeURIComponent(GLOBAL_SITE_CHANNEL)}/sse`);
     sseSource.onopen = () => {
-      if ($('cloudDiagSse')) $('cloudDiagSse').textContent = '● Tự động nhận cập nhật tức thì';
-      logCloudEvent(`📡 Đã kết nối tự động vào kênh đồng bộ chung toàn cầu`);
+      if ($('cloudDiagSse')) $('cloudDiagSse').textContent = '● Real-time Push Active';
+      logCloudEvent('📡 Đã kết nối kênh đẩy thời gian thực (SSE) toàn cầu');
     };
-    sseSource.onmessage = (event) => {
+    sseSource.onmessage = async (event) => {
       try {
         const wrapper = JSON.parse(event.data);
         if (wrapper.message && wrapper.message.trim().startsWith('{')) {
-          const chunkObj = JSON.parse(wrapper.message);
-          if (chunkObj.t === 'cvm_chunk') {
-            ingestIncomingChunk(chunkObj);
-            return;
-          }
+          const parsed = JSON.parse(wrapper.message);
+          await ingestSignalOrChunk(parsed);
         }
       } catch (e) {}
+    };
+    sseSource.onerror = () => {
+      if ($('cloudDiagSse')) $('cloudDiagSse').textContent = '● Đang tự kết nối lại...';
+      if (sseSource) { try { sseSource.close(); } catch (e) {} sseSource = null; }
+      sseReconnectTimer = setTimeout(() => startRealtimePushListener(), 5000);
     };
   } catch (e) {}
 }
 
-setInterval(() => pullCloudState(true), 5000);
+setInterval(() => pullCloudState(true, false), 6000);
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) pullCloudState(true);
+  if (!document.hidden) pullCloudState(true, false);
 });
 window.addEventListener('online', () => {
   if ($('cloudDiagNet')) $('cloudDiagNet').textContent = '● Trực tuyến (Online)';
   startRealtimePushListener();
-  pullCloudState(true);
+  pullCloudState(true, true);
 });
 window.addEventListener('offline', () => {
   $('cloudDot').className = 'net-dot offline';
@@ -3143,8 +3927,42 @@ window.addEventListener('offline', () => {
   if ($('cloudDiagNet')) $('cloudDiagNet').textContent = '● Mất kết nối mạng';
 });
 
+function forcePullFromInternetNow() {
+  pullCloudState(false, true);
+}
+function forcePushToInternetNow() {
+  syncAdminVocabToAllAccounts();
+  pushCloudState("Đẩy đồng bộ thủ công toàn hệ thống");
+}
 function forceFullSyncNow() {
-  pullCloudState(false);
+  forcePullFromInternetNow();
+}
+function reconnectRealtimeChannels() {
+  startRealtimePushListener();
+  pullCloudState(false, true);
+  showToast("🔌 Đã khởi động lại kênh đồng bộ thời gian thực!");
+}
+function copyInstantSyncLink() {
+  const baseUrl = window.location.href.split('#')[0].split('?')[0];
+  let params = [];
+  if (sharedCloudBlobId) params.push('sync=' + encodeURIComponent(sharedCloudBlobId));
+  if (firebaseDbUrl) params.push('fb=' + encodeURIComponent(firebaseDbUrl));
+  const shareUrl = params.length ? `${baseUrl}#${params.join('&')}` : baseUrl;
+  navigator.clipboard.writeText(shareUrl);
+  showToast("🔗 Đã sao chép Link đồng bộ tức thì! Mở trên bất kỳ máy nào sẽ tự tải đủ dữ liệu.");
+}
+function saveFirebaseDbUrl() {
+  firebaseDbUrl = ($('firebaseDbUrlInput')?.value || '').trim();
+  if (!firebaseDbUrl) return alert("Vui lòng nhập đường dẫn Firebase Realtime Database!");
+  localStorage.setItem('cvm_firebase_url', firebaseDbUrl);
+  pushCloudState("Kết nối Firebase Realtime DB");
+  showToast("🔥 Đã lưu Firebase Realtime DB & bắt đầu đồng bộ vĩnh viễn!");
+}
+function clearFirebaseDbUrl() {
+  firebaseDbUrl = '';
+  localStorage.removeItem('cvm_firebase_url');
+  if ($('firebaseDbUrlInput')) $('firebaseDbUrlInput').value = '';
+  showToast("Đã gỡ cấu hình Firebase — quay về chế độ đồng bộ tự động mặc định.");
 }
 
 function exportBackupJson() {
@@ -3155,6 +3973,31 @@ function exportBackupJson() {
   a.download = `Sao_luu_Tu_vung_HSK_${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+async function importBackupJsonFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const txt = await file.text();
+    const parsed = JSON.parse(txt);
+    if (!parsed || !parsed.adminCatalog) return alert("File sao lưu không hợp lệ!");
+    appState.catalogRevision = Math.max(appState.catalogRevision || 1, parsed.catalogRevision || 1) + 1;
+    appState.catalogUpdatedAt = Date.now();
+    appState.adminCatalog = parsed.adminCatalog;
+    if (parsed.users) {
+      for (const [uid, u] of Object.entries(parsed.users)) {
+        appState.users[uid] = u;
+      }
+    }
+    syncAdminVocabToAllAccounts();
+    await pushCloudState("Khôi phục từ file sao lưu JSON");
+    showToast(`✅ Đã nhập file sao lưu (${getAllAdminWordsCount()} từ) và đồng bộ lên Internet!`);
+  } catch (e) {
+    alert("Lỗi đọc file sao lưu: " + e.message);
+  } finally {
+    event.target.value = '';
+  }
 }
 
 // ==================== 3. ĐĂNG NHẬP & ĐĂNG KÝ TRỰC TIẾP TRÊN THANH ĐIỀU HƯỚNG + MODAL ====================
@@ -3804,31 +4647,60 @@ function commitAiParsedWords() {
   if (!validWords.length) return alert("Danh sách trống!");
 
   if (aiCurrentTarget === 'admin') {
-    const hIdx = parseInt($('admHskSelect').value || '0', 10);
-    const lIdx = parseInt($('admLessonSelect').value || '0', 10);
-    const tIdx = parseInt($('admTextSelect').value || '0', 10);
-    const { hObj, lObj, tObj } = getSelectedAdminTextObj();
-    if (!tObj) return alert("Vui lòng chọn mục HSK - Bài - Text trước!");
-    tObj.words.push(...validWords);
-    appState.catalogUpdatedAt = Date.now();
-
-    const createdExam = registerAdminGeneratedExam(hIdx, lIdx, tIdx, validWords.length);
-    const updatedNames = Object.values(appState.accountUpdateReceipts || {}).map(r => r.name).join(', ');
-    pushCloudState(`Admin nhập ${validWords.length} từ & tạo đề "${createdExam?.title || tObj.name}"`);
-
-    const notice = $('adminExamCreatedNotice');
-    if (notice && createdExam) {
-      notice.style.display = 'flex';
-      $('adminExamCreatedText').textContent = `✅ Đã tạo "${createdExam.title}" (${tObj.words.length} từ) & tự động nhập vào kho Thành viên / Quản trị viên!`;
-      $('adminExamCreatedSub').textContent = `📋 Tài khoản đã cập nhật trên hệ thống: ${updatedNames}`;
+    if (!appState.adminCatalog.length) {
+      appState.adminCatalog.push({
+        hsk: 'HSK 1',
+        lessons: [{ id: 'l_' + Date.now(), name: 'Bài 1', texts: [{ id: 't_' + Date.now(), name: 'Text 1', words: [] }] }]
+      });
+      renderAdminSelectors();
     }
-    showToast(`🎉 Đã tạo đề kiểm tra "${createdExam?.title}" & cập nhật cho ${Object.keys(appState.accountUpdateReceipts).length} tài khoản!`);
+    let { hObj, lObj, tObj, hIdx, lIdx, tIdx } = getSelectedAdminTextObj();
+    if (hObj && !lObj) {
+      hObj.lessons.push({ id: 'l_' + Date.now(), name: 'Bài 1', texts: [{ id: 't_' + Date.now(), name: 'Text 1', words: [] }] });
+      renderAdminSelectors();
+      ({ hObj, lObj, tObj, hIdx, lIdx, tIdx } = getSelectedAdminTextObj());
+    }
+    if (lObj && !tObj) {
+      lObj.texts.push({ id: 't_' + Date.now(), name: 'Text 1', words: [] });
+      renderAdminSelectors();
+      ({ hObj, lObj, tObj, hIdx, lIdx, tIdx } = getSelectedAdminTextObj());
+    }
+    if (!tObj) return alert("Vui lòng tạo mục HSK - Bài - Text trước!");
+
+    (async () => {
+      await pullCloudState(true).catch(() => {});
+      tObj.words.push(...validWords);
+      appState.catalogUpdatedAt = Date.now();
+
+      const createdExam = registerAdminGeneratedExam(hIdx, lIdx, tIdx, validWords.length);
+      const updatedNames = Object.values(appState.accountUpdateReceipts || {}).map(r => r.name).join(', ');
+      await pushCloudState(`Admin thêm đồng thời ${validWords.length} từ vào Kho Admin & Học viên`);
+
+      const notice = $('adminExamCreatedNotice');
+      if (notice && createdExam) {
+        notice.style.display = 'flex';
+        $('adminExamCreatedText').textContent = `✅ Đã thêm ${validWords.length} từ cùng lúc vào Kho Admin & Kho Học viên (${getAllAdminWordsCount()} từ) và tạo "${createdExam.title}"!`;
+        $('adminExamCreatedSub').textContent = `📋 Tài khoản đã cập nhật đồng thời: ${updatedNames}`;
+      }
+      showToast(`🎉 Đã thêm ${validWords.length} từ vào Kho Admin & Kho Học viên cùng lúc!`);
+    })();
   } else if (aiCurrentTarget === 'personal') {
     const user = getCurrentUser();
-    const idx = parseInt($('personalSetSelect')?.value || '0', 10);
-    user.personalSets[idx].words.unshift(...validWords);
-    pushCloudState(`AI nhập ${validWords.length} từ cá nhân`);
-    showToast(`✅ AI đã lưu ${validWords.length} từ vào Kho từ vựng cá nhân!`);
+    if (myVocabViewMode === 'catalog') {
+      const { hObj, lObj, tObj } = getSelectedMyCatalogTextObj();
+      if (tObj) {
+        const existZh = new Set(tObj.words.map(w => w.zh));
+        const toAdd = validWords.filter(w => !existZh.has(w.zh));
+        tObj.words.push(...toAdd);
+        pushCloudState(`AI nhập ${toAdd.length} từ vào ${hObj.hsk} · ${lObj.name} · ${tObj.name}`);
+        showToast(`✅ AI đã lưu ${toAdd.length} từ vào mục "${hObj.hsk} ➔ ${lObj.name} ➔ ${tObj.name}"!`);
+      }
+    } else {
+      const idx = parseInt($('personalSetSelect')?.value || '0', 10);
+      user.personalSets[idx].words.unshift(...validWords);
+      pushCloudState(`AI nhập ${validWords.length} từ cá nhân`);
+      showToast(`✅ AI đã lưu ${validWords.length} từ vào Kho từ vựng cá nhân!`);
+    }
   } else if (aiCurrentTarget === 'copybook') {
     validWords.forEach(w => addWordToWrongMemory(w, false));
     switchTab('tab-copybook');
@@ -3892,7 +4764,7 @@ function refreshAllUI() {
   $('statAdminTotal').textContent = getAllAdminWordsCount();
 
   $('sideWrongBadge').textContent = (user.wrongWords || []).length;
-  const myTotal = (user.personalSets || []).reduce((acc, s) => acc + s.words.length, 0);
+  const myTotal = Math.max(countWordsInUserPersonalCatalog(user), (user.personalSets || []).reduce((acc, s) => acc + s.words.length, 0));
   $('sideMyVocabBadge').textContent = myTotal;
   $('sideAdminBadge').textContent = getAllAdminWordsCount();
 
@@ -3928,6 +4800,15 @@ function refreshAllUI() {
 function renderSystemUpdateAndAccountReceipts() {
   const receipts = Object.values(appState.accountUpdateReceipts || {});
   const allUsers = Object.values(appState.users || {});
+  const totalSysWords = getAllAdminWordsCount();
+  const studentAccs = allUsers.filter(u => !(u.role === 'admin' || u.uid === SYSTEM_ADMIN_CRED.uid));
+
+  if ($('dualRepoAdminCount')) $('dualRepoAdminCount').textContent = `${totalSysWords} từ vựng`;
+  if ($('dualRepoStudentCount')) $('dualRepoStudentCount').textContent = `${totalSysWords} từ vựng · Đã thêm cùng lúc`;
+  if ($('dualRepoStudentAccNum')) $('dualRepoStudentAccNum').textContent = studentAccs.length;
+  if ($('dualRepoSyncTimestamp') && appState.lastSystemUpdate?.updatedAt) {
+    $('dualRepoSyncTimestamp').textContent = `✓ Đã đồng bộ lúc ${appState.lastSystemUpdate.updatedAt}`;
+  }
 
   // Đảm bảo mọi tài khoản đã đăng ký đều có trạng thái hiển thị
   const accountStatuses = allUsers.map(u => {
@@ -3993,40 +4874,364 @@ function renderGeneratedTestsList() {
   const card = $('adminGeneratedTestsCard');
   const box = $('generatedTestsListBox');
   const badge = $('generatedTestsCountBadge');
+  const delAllBtn = $('btnDeleteAllTests');
   if (!card || !box) return;
 
   const tests = appState.generatedTests || [];
   if (badge) badge.textContent = `${tests.length} đề đã tạo`;
+  if (delAllBtn) delAllBtn.style.display = tests.length > 0 ? 'inline-flex' : 'none';
 
   if (!tests.length) {
-    box.innerHTML = `<div class="small" style="color:var(--muted);padding:6px 2px">
-      Chưa có đề mới tải lên trong phiên này. Bạn có thể chọn bất kỳ bài HSK nào ở khung bên dưới để kiểm tra ngay, hoặc vào mục <b>🛡️ Quản trị HSK-Bài-Text</b> tải từ vựng lên để tự động tạo đề!
+    box.innerHTML = `<div class="small" style="color:var(--muted);padding:8px 2px">
+      Chưa có đề kiểm tra (Test) nào. Hãy bấm <b>➕ Tạo Test mới</b> ở góc trên để tạo đề từ bất kỳ nguồn từ vựng nào, hoặc vào mục <b>🛡️ Quản trị HSK-Bài-Text</b> để đẩy từ vựng lên!
     </div>`;
     return;
   }
 
-  box.innerHTML = tests.map((ex, idx) => `
+  box.innerHTML = tests.map((ex, idx) => {
+    const wordCnt = getWordsForGeneratedExam(ex).length || ex.wordCount || 0;
+    const tagLabel = ex.sourceType === 'custom' ? 'TỰ TẠO' : (ex.sourceType === 'personal' ? 'CÁ NHÂN' : (ex.sourceType === 'wrong' ? 'TỪ SAI' : 'ĐỀ TEST'));
+    return `
     <div class="exam-pill-card">
-      <div>
+      <div style="flex:1;min-width:220px">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          ${idx === 0 ? '<span class="badge ok">MỚI NHẤT</span>' : '<span class="badge default">ĐỀ ADMIN</span>'}
+          ${idx === 0 ? '<span class="badge ok">MỚI NHẤT</span>' : `<span class="badge default">${tagLabel}</span>`}
           <strong style="font-size:14px;color:var(--ink)">${ex.title}</strong>
-          <span class="badge ai">${ex.wordCount} câu hỏi</span>
+          <span class="badge ai">${wordCnt} câu hỏi</span>
         </div>
         <div class="small" style="margin-top:3px">
-          Tạo bởi: <b>${ex.createdBy}</b> · Lúc: ${ex.createdAt} · Đã tự động nhập vào kho Thành viên & Quản trị viên
+          ${ex.pathLabel ? `Nguồn: <b>${ex.pathLabel}</b> · ` : ''}Tạo bởi: <b>${ex.createdBy || 'Người dùng'}</b> · Lúc: ${ex.createdAt || ''}
         </div>
       </div>
-      <button type="button" class="primary" style="padding:7px 14px;font-size:13px" onclick="launchGeneratedExamById('${ex.id}')">
-        🚀 Làm đề này ngay
-      </button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button type="button" class="primary" style="padding:7px 13px;font-size:13px" onclick="launchGeneratedExamById('${ex.id}')">
+          🚀 Làm đề này
+        </button>
+        <button type="button" class="danger" style="padding:7px 11px;font-size:12.5px" onclick="deleteGeneratedTest('${ex.id}')" title="Xóa đề kiểm tra này">
+          🗑️ Xóa Test
+        </button>
+      </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
+}
+
+// ==================== CHỨC NĂNG TẠO TEST & XÓA TEST ====================
+function deleteGeneratedTest(examId) {
+  const idx = (appState.generatedTests || []).findIndex(e => e.id === examId);
+  if (idx < 0) return;
+  const ex = appState.generatedTests[idx];
+  openDeleteConfirm436({
+    title: "Xóa đề kiểm tra (Test) này?",
+    desc: `Đề «${ex.title}» (${ex.wordCount || 0} câu hỏi) sẽ bị xóa khỏi danh sách và đồng bộ xóa lên hệ thống.`,
+    onConfirm: () => {
+      appState.generatedTests.splice(idx, 1);
+      appState.testsRevision = (appState.testsRevision || 1) + 1;
+      if (testSession.title === ex.title) {
+        testSession = { title: "", words: [], currentIndex: 0, score: 0, wrongCount: 0, answeredMap: {} };
+        const u = getCurrentUser();
+        if (u.resumeSession?.title === ex.title) u.resumeSession = null;
+        renderCurrentTestQuestion();
+      }
+      pushCloudState(`Xóa đề Test: ${ex.title}`);
+      showToast(`🗑️ Đã xóa đề Test "${ex.title}"!`);
+    }
+  });
+}
+
+function deleteAllGeneratedTests() {
+  const count = (appState.generatedTests || []).length;
+  if (!count) return showToast("Danh sách đề Test đang trống.");
+  openDeleteConfirm436({
+    title: `Xóa toàn bộ ${count} đề Test?`,
+    desc: "Tất cả các đề kiểm tra trong danh sách sẽ bị xóa vĩnh viễn và đồng bộ xóa lên Internet.",
+    onConfirm: () => {
+      appState.generatedTests = [];
+      appState.testsRevision = (appState.testsRevision || 1) + 1;
+      testSession = { title: "", words: [], currentIndex: 0, score: 0, wrongCount: 0, answeredMap: {} };
+      getCurrentUser().resumeSession = null;
+      renderCurrentTestQuestion();
+      pushCloudState("Xóa toàn bộ danh sách đề Test");
+      showToast("🗑️ Đã xóa toàn bộ danh sách đề Test!");
+    }
+  });
+}
+
+function openCreateTestModal(defaultMode = null) {
+  const modeSel = $('ctSourceMode');
+  if (modeSel) {
+    if (defaultMode) {
+      modeSel.value = defaultMode;
+    } else if (getAllAdminWordsCount() > 0) {
+      modeSel.value = 'admin_catalog';
+    } else if (countWordsInUserPersonalCatalog(getCurrentUser()) > 0) {
+      modeSel.value = 'personal_catalog';
+    } else {
+      modeSel.value = 'custom_text';
+    }
+  }
+  if ($('ctTestTitleInput')) $('ctTestTitleInput').value = '';
+  if ($('ctMaxQuestionsInput')) $('ctMaxQuestionsInput').value = '';
+  if ($('ctCustomWordsTextarea')) $('ctCustomWordsTextarea').value = '';
+
+  onCreateTestSourceChange();
+  $('createTestModal').classList.add('open');
+  setTimeout(() => $('ctTestTitleInput')?.focus(), 100);
+}
+
+function closeCreateTestModal() {
+  $('createTestModal').classList.remove('open');
+}
+
+function getCreateTestCatalogByMode() {
+  const mode = $('ctSourceMode')?.value || 'admin_catalog';
+  if (mode === 'personal_catalog') return ensureUserPersonalCatalog(getCurrentUser());
+  return appState.adminCatalog || [];
+}
+
+function onCreateTestSourceChange() {
+  const mode = $('ctSourceMode')?.value || 'admin_catalog';
+  const isCatalog = (mode === 'admin_catalog' || mode === 'personal_catalog');
+  if ($('ctScopeCol')) $('ctScopeCol').style.display = isCatalog ? 'block' : 'none';
+  if ($('ctCatalogSelectorsBox')) $('ctCatalogSelectorsBox').style.display = isCatalog ? 'block' : 'none';
+  if ($('ctPersonalSetBox')) $('ctPersonalSetBox').style.display = mode === 'personal_set' ? 'block' : 'none';
+  if ($('ctCustomTextBox')) $('ctCustomTextBox').style.display = mode === 'custom_text' ? 'block' : 'none';
+
+  if (isCatalog) {
+    const cat = getCreateTestCatalogByMode();
+    const hSel = $('ctHskSelect');
+    if (hSel) {
+      hSel.innerHTML = cat.length
+        ? cat.map((h, i) => `<option value="${i}">${h.hsk}</option>`).join('')
+        : '<option value="">(Chưa có cấp HSK)</option>';
+      if (mode === 'admin_catalog' && $('admHskSelect')?.value && hSel.querySelector(`option[value="${$('admHskSelect').value}"]`)) {
+        hSel.value = $('admHskSelect').value;
+      }
+    }
+    onCtHskChange();
+  } else if (mode === 'personal_set') {
+    const user = getCurrentUser();
+    const pSel = $('ctPersonalSetSelect');
+    if (pSel) {
+      pSel.innerHTML = (user.personalSets || []).map((s, i) => `<option value="${i}">${s.name} (${s.words.length} từ)</option>`).join('')
+        || '<option value="">(Chưa có bộ từ)</option>';
+    }
+    updateCreateTestPreview();
+  } else {
+    updateCreateTestPreview();
+  }
+}
+
+function onCtHskChange() {
+  const cat = getCreateTestCatalogByMode();
+  const hIdx = parseInt($('ctHskSelect')?.value || '0', 10);
+  const hObj = cat[hIdx];
+  const lSel = $('ctLessonSelect');
+  if (lSel) {
+    lSel.innerHTML = (hObj?.lessons?.length)
+      ? hObj.lessons.map((l, i) => `<option value="${i}">${l.name}</option>`).join('')
+      : '<option value="">(Chưa có bài)</option>';
+    if ($('ctSourceMode')?.value === 'admin_catalog' && $('admLessonSelect')?.value && lSel.querySelector(`option[value="${$('admLessonSelect').value}"]`)) {
+      lSel.value = $('admLessonSelect').value;
+    }
+  }
+  onCtLessonChange();
+}
+
+function onCtLessonChange() {
+  const cat = getCreateTestCatalogByMode();
+  const hIdx = parseInt($('ctHskSelect')?.value || '0', 10);
+  const lIdx = parseInt($('ctLessonSelect')?.value || '0', 10);
+  const lObj = cat[hIdx]?.lessons?.[lIdx];
+  const tSel = $('ctTextSelect');
+  if (tSel) {
+    tSel.innerHTML = (lObj?.texts?.length)
+      ? lObj.texts.map((t, i) => `<option value="${i}">${t.name} (${t.words.length} từ)</option>`).join('')
+      : '<option value="">(Chưa có Text)</option>';
+    if ($('ctSourceMode')?.value === 'admin_catalog' && $('admTextSelect')?.value && tSel.querySelector(`option[value="${$('admTextSelect').value}"]`)) {
+      tSel.value = $('admTextSelect').value;
+    }
+  }
+  updateCreateTestPreview();
+}
+
+function collectCreateTestWordsSync() {
+  const mode = $('ctSourceMode')?.value || 'admin_catalog';
+  const user = getCurrentUser();
+  let words = [];
+  let autoTitle = '';
+  let pathLabel = '';
+  let sourceType = 'custom';
+  let metaIdx = { hskIndex: 0, lessonIndex: 0, textIndex: 0 };
+
+  if (mode === 'admin_catalog' || mode === 'personal_catalog') {
+    const cat = getCreateTestCatalogByMode();
+    const scope = $('ctCatalogScope')?.value || 'text';
+    const hIdx = parseInt($('ctHskSelect')?.value || '0', 10);
+    const lIdx = parseInt($('ctLessonSelect')?.value || '0', 10);
+    const tIdx = parseInt($('ctTextSelect')?.value || '0', 10);
+    metaIdx = { hskIndex: hIdx, lessonIndex: lIdx, textIndex: tIdx };
+    sourceType = mode === 'admin_catalog' ? 'admin' : 'personal';
+
+    const hObj = cat[hIdx];
+    const lObj = hObj?.lessons?.[lIdx];
+    const tObj = lObj?.texts?.[tIdx];
+
+    if (scope === 'text' && tObj) {
+      words = [...(tObj.words || [])];
+      pathLabel = `${hObj.hsk} · ${lObj.name} · ${tObj.name}`;
+      autoTitle = `Test: ${pathLabel}`;
+    } else if (scope === 'lesson' && lObj) {
+      (lObj.texts || []).forEach(t => words.push(...(t.words || [])));
+      pathLabel = `${hObj.hsk} · ${lObj.name} (Toàn bài)`;
+      autoTitle = `Test: ${pathLabel}`;
+    } else if (scope === 'hsk' && hObj) {
+      (hObj.lessons || []).forEach(l => (l.texts || []).forEach(t => words.push(...(t.words || []))));
+      pathLabel = `Toàn bộ ${hObj.hsk}`;
+      autoTitle = `Test tổng hợp ${hObj.hsk}`;
+    } else {
+      cat.forEach(h => (h.lessons || []).forEach(l => (l.texts || []).forEach(t => words.push(...(t.words || [])))));
+      pathLabel = mode === 'admin_catalog' ? 'Toàn bộ Kho HSK Admin' : 'Toàn bộ Kho HSK Cá nhân';
+      autoTitle = `Test tổng hợp (${pathLabel})`;
+    }
+  } else if (mode === 'personal_set') {
+    const pIdx = parseInt($('ctPersonalSetSelect')?.value || '0', 10);
+    const pSet = user.personalSets?.[pIdx];
+    sourceType = 'personal';
+    if (pSet) {
+      words = [...(pSet.words || [])];
+      pathLabel = `Bộ từ: ${pSet.name}`;
+      autoTitle = `Test: ${pSet.name}`;
+    }
+  } else if (mode === 'wrong') {
+    sourceType = 'wrong';
+    words = [...(user.wrongWords || [])];
+    pathLabel = 'Sổ Chép cho nhớ (Từ sai)';
+    autoTitle = `Test ôn lại từ sai (${new Date().toLocaleDateString('vi-VN')})`;
+  } else {
+    sourceType = 'custom';
+    const raw = ($('ctCustomWordsTextarea')?.value || '').trim();
+    words = raw ? smartExtractChineseEntries(raw, false) : [];
+    pathLabel = 'Danh sách từ tự nhập';
+    autoTitle = `Test tự tạo (${new Date().toLocaleTimeString('vi-VN')})`;
+  }
+
+  // Lọc trùng theo chữ Hán
+  const deduped = [];
+  const seen = new Set();
+  words.forEach(w => {
+    if (w && w.zh && !seen.has(w.zh)) {
+      seen.add(w.zh);
+      deduped.push({ id: w.id || ('ctw_' + deduped.length), zh: w.zh, pinyin: w.pinyin || '', vi: w.vi || '' });
+    }
+  });
+
+  return { words: deduped, autoTitle, pathLabel, sourceType, ...metaIdx };
+}
+
+function updateCreateTestPreview() {
+  const { words } = collectCreateTestWordsSync();
+  const maxQ = parseInt($('ctMaxQuestionsInput')?.value || '0', 10);
+  const finalCnt = (maxQ > 0 && maxQ < words.length) ? maxQ : words.length;
+  const badge = $('ctWordCountPreview');
+  if (badge) {
+    badge.textContent = finalCnt > 0
+      ? `📋 Sẽ tạo đề gồm: ${finalCnt} câu hỏi (từ ${words.length} từ)`
+      : '⚠️ Nguồn đang chọn hiện có 0 từ vựng';
+    badge.className = finalCnt > 0 ? 'badge ok' : 'badge err';
+  }
+}
+
+async function handleCreateTestFileImport(event, type) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    showToast(`📂 Đang đọc file "${file.name}"...`);
+    const extracted = await aiExtractFromAnyFile(file, type);
+    if (!extracted.length) return alert("Không tìm thấy ký tự chữ Hán nào trong file này!");
+    $('ctCustomWordsTextarea').value = extracted.map(w => `${w.zh}${w.pinyin ? ' | ' + w.pinyin : ''}${w.vi ? ' | ' + w.vi : ''}`).join('\n');
+    updateCreateTestPreview();
+    showToast(`✓ Đã đọc được ${extracted.length} từ từ "${file.name}"!`);
+  } catch (e) {
+    alert("Lỗi đọc file: " + e.message);
+  } finally {
+    event.target.value = '';
+  }
+}
+
+async function submitCreateTestModal() {
+  const info = collectCreateTestWordsSync();
+  if (!info.words.length) {
+    return alert("Chưa có từ vựng nào để tạo Test! Hãy chọn nguồn có từ hoặc nhập danh sách chữ Hán vào ô Tự nhập.");
+  }
+
+  const btn = $('btnSubmitCreateTest');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang chuẩn hóa & tạo Test...'; }
+
+  try {
+    let finalWords = [...info.words];
+
+    // Nếu là danh sách tự nhập mà có từ thiếu Pinyin / Nghĩa -> AI tự điền
+    const needEnrich = finalWords.filter(w => !w.pinyin || !w.vi);
+    if (needEnrich.length > 0 && navigator.onLine) {
+      const batchSize = 5;
+      for (let i = 0; i < needEnrich.length; i += batchSize) {
+        const batch = needEnrich.slice(i, i + batchSize);
+        await Promise.all(batch.map(async item => {
+          const enr = await aiEnrichSingleWord(item.zh);
+          if (!item.pinyin) item.pinyin = enr.pinyin;
+          if (!item.vi) item.vi = enr.vi;
+        }));
+      }
+    }
+
+    if ($('ctShuffleChk')?.checked) {
+      finalWords.sort(() => Math.random() - 0.5);
+    }
+
+    const maxQ = parseInt($('ctMaxQuestionsInput')?.value || '0', 10);
+    if (maxQ > 0 && maxQ < finalWords.length) {
+      finalWords = finalWords.slice(0, maxQ);
+    }
+
+    const customTitle = ($('ctTestTitleInput')?.value || '').trim();
+    const finalTitle = customTitle || info.autoTitle;
+    const examId = 'test_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+    const examObj = {
+      id: examId,
+      title: finalTitle,
+      pathLabel: info.pathLabel,
+      sourceType: info.sourceType,
+      hskIndex: info.hskIndex,
+      lessonIndex: info.lessonIndex,
+      textIndex: info.textIndex,
+      wordCount: finalWords.length,
+      addedWordsCount: finalWords.length,
+      words: finalWords,
+      createdAt: new Date().toLocaleString('vi-VN'),
+      createdBy: getCurrentUser().name
+    };
+
+    appState.generatedTests.unshift(examObj);
+    appState.testsRevision = (appState.testsRevision || 1) + 1;
+
+    await pushCloudState(`Tạo đề Test mới: ${finalTitle} (${finalWords.length} câu)`);
+    closeCreateTestModal();
+
+    if ($('ctStartNowChk')?.checked) {
+      switchTab('tab-test');
+      launchTestWithWords([...finalWords], finalTitle, 0, 0);
+    }
+    showToast(`🎉 Đã tạo thành công đề "${finalTitle}" (${finalWords.length} câu hỏi)!`);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Tạo & Lưu Test'; }
+  }
 }
 
 // ==================== 6. HỆ THỐNG KIỂM TRA TỪ VỰNG + LƯU LỘ TRÌNH CẮT GIỮA ====================
 let testSession = {
-  title: "HSK 1 · Bài 1 · Text 1",
+  title: "",
   words: [],
   currentIndex: 0,
   score: 0,
@@ -4034,65 +5239,97 @@ let testSession = {
   answeredMap: {}
 };
 
+function getActiveTestCatalog() {
+  const type = $('testSourceType')?.value || 'admin';
+  if (type === 'personal_catalog') {
+    return ensureUserPersonalCatalog(getCurrentUser());
+  }
+  return appState.adminCatalog || [];
+}
+
 function populateTestHskDropdown() {
+  const type = $('testSourceType')?.value || 'admin';
   const sel = $('testHskSelect');
   if (!sel) return;
+  if (type === 'personal') {
+    const user = getCurrentUser();
+    const prev = sel.value;
+    const sets = user.personalSets || [];
+    sel.innerHTML = sets.length
+      ? sets.map((s, i) => `<option value="${i}">${s.name} (${s.words.length} từ)</option>`).join('')
+      : '<option value="">(Chưa có bộ từ)</option>';
+    if (prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
+    return;
+  }
+  const catalog = getActiveTestCatalog();
   const prev = sel.value;
-  sel.innerHTML = appState.adminCatalog.map((h, i) => `<option value="${i}">${h.hsk}</option>`).join('');
+  sel.innerHTML = catalog.length
+    ? catalog.map((h, i) => `<option value="${i}">${h.hsk}</option>`).join('')
+    : '<option value="">(Chưa có dữ liệu — Hãy tự đẩy vào)</option>';
   if (prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
   populateTestLessons();
 }
 
 function populateTestLessons() {
+  const type = $('testSourceType')?.value || 'admin';
+  if (type !== 'admin' && type !== 'personal_catalog') return;
+  const catalog = getActiveTestCatalog();
   const hIdx = parseInt($('testHskSelect').value || '0', 10);
-  const hObj = appState.adminCatalog[hIdx];
+  const hObj = catalog[hIdx];
   const sel = $('testLessonSelect');
-  if (!hObj || !sel) return;
+  if (!sel) return;
+  if (!hObj) {
+    sel.innerHTML = '<option value="">(Chưa có Bài - Text)</option>';
+    return;
+  }
+  const prev = sel.value;
   const opts = [];
-  hObj.lessons.forEach((l, lIdx) => {
-    l.texts.forEach((t, tIdx) => {
+  (hObj.lessons || []).forEach((l, lIdx) => {
+    (l.texts || []).forEach((t, tIdx) => {
       opts.push(`<option value="${lIdx}_${tIdx}">${l.name} — ${t.name} (${t.words.length} từ)</option>`);
     });
   });
-  sel.innerHTML = opts.join('');
+  sel.innerHTML = opts.length ? opts.join('') : '<option value="">(Chưa có Text)</option>';
+  if (prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
 }
 
 function onTestSourceTypeChange() {
   const type = $('testSourceType').value;
-  const user = getCurrentUser();
-  if (type === 'admin') {
+  if (type === 'admin' || type === 'personal_catalog') {
     $('testFilterCol1').style.display = 'block';
     $('testFilterCol2').style.display = 'block';
     populateTestHskDropdown();
   } else if (type === 'personal') {
     $('testFilterCol1').style.display = 'block';
     $('testFilterCol2').style.display = 'none';
-    $('testHskSelect').innerHTML = (user.personalSets || []).map((s, i) => `<option value="${i}">${s.name} (${s.words.length} từ)</option>`).join('');
+    populateTestHskDropdown();
   } else {
     $('testFilterCol1').style.display = 'none';
     $('testFilterCol2').style.display = 'none';
   }
 }
 
-function startSelectedTest() {
+function startSelectedTest(silent = false) {
   const type = $('testSourceType').value;
   const user = getCurrentUser();
   let words = [];
   let title = '';
 
-  if (type === 'admin') {
+  if (type === 'admin' || type === 'personal_catalog') {
+    const catalog = getActiveTestCatalog();
     const hIdx = parseInt($('testHskSelect').value || '0', 10);
     const [lIdx, tIdx] = ($('testLessonSelect').value || '0_0').split('_').map(Number);
-    const hObj = appState.adminCatalog[hIdx];
-    const lObj = hObj?.lessons[lIdx];
-    const tObj = lObj?.texts[tIdx];
+    const hObj = catalog[hIdx];
+    const lObj = hObj?.lessons?.[lIdx];
+    const tObj = lObj?.texts?.[tIdx];
     if (tObj) {
       words = [...tObj.words];
-      title = `${hObj.hsk} · ${lObj.name} · ${tObj.name}`;
+      const prefix = type === 'personal_catalog' ? 'Cá nhân · ' : '';
+      title = `${prefix}${hObj.hsk} · ${lObj.name} · ${tObj.name}`;
     }
   } else if (type === 'personal') {
     const pIdx = parseInt($('testHskSelect').value || '0', 10);
-    const pSet = user.personalSets[pIdx];
+    const pSet = user.personalSets?.[pIdx];
     if (pSet) {
       words = [...pSet.words];
       title = `Cá nhân: ${pSet.name}`;
@@ -4102,7 +5339,11 @@ function startSelectedTest() {
     title = `Ôn lại từ sai ("Chép cho nhớ")`;
   }
 
-  if (!words.length) return alert("Nguồn từ vựng này chưa có từ nào! Hãy chọn bài khác hoặc bấm '🤖 AI Nhập từ / Word / Excel'.");
+  if (!words.length) {
+    renderCurrentTestQuestion();
+    if (!silent) showToast("ℹ️ Nguồn này chưa có từ vựng! Hãy bấm '➕ Tạo Test mới' hoặc đẩy từ vựng vào kho.");
+    return;
+  }
   if ($('chkShuffleTest').checked) words.sort(() => Math.random() - 0.5);
 
   launchTestWithWords(words, title, 0, 0);
@@ -4122,7 +5363,17 @@ function launchTestWithWords(words, title, startIndex = 0, startScore = 0) {
 }
 
 function renderCurrentTestQuestion() {
-  if (!testSession.words.length) return;
+  const emptyEl = $('testEmptyStateBox');
+  const activeEl = $('testActiveArenaContent');
+  if (!testSession.words.length) {
+    if (emptyEl) emptyEl.style.display = 'block';
+    if (activeEl) activeEl.style.display = 'none';
+    if ($('sideTestBadge')) $('sideTestBadge').textContent = '0/0';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (activeEl) activeEl.style.display = 'block';
+
   const idx = testSession.currentIndex;
   const total = testSession.words.length;
   const word = testSession.words[idx];
@@ -4613,23 +5864,234 @@ function clearAllWrongWords() {
   });
 }
 
-// ==================== 9. KHO TỪ VỰNG CÁ NHÂN & LỊCH SỬ ====================
+// ==================== 9. KHO TỪ VỰNG CÁ NHÂN (3 TẦNG HSK-BÀI-TEXT NHƯ ADMIN + BỘ TỪ TỰ DO) & LỊCH SỬ ====================
+let myVocabViewMode = 'catalog'; // 'catalog' | 'sets'
+
+function switchMyVocabMode(mode) {
+  myVocabViewMode = mode;
+  if ($('myVocabModeCatalogBtn')) $('myVocabModeCatalogBtn').classList.toggle('active', mode === 'catalog');
+  if ($('myVocabModeSetsBtn')) $('myVocabModeSetsBtn').classList.toggle('active', mode === 'sets');
+  if ($('myVocabCatalogBox')) $('myVocabCatalogBox').style.display = mode === 'catalog' ? 'block' : 'none';
+  if ($('myVocabSetsBox')) $('myVocabSetsBox').style.display = mode === 'sets' ? 'block' : 'none';
+  if ($('btnMyVocabHeaderAction')) {
+    $('btnMyVocabHeaderAction').style.display = mode === 'sets' ? 'inline-flex' : 'none';
+  }
+  renderPersonalVocabList();
+}
+
+function renderMyCatalogSelectors() {
+  const user = getCurrentUser();
+  const cat = ensureUserPersonalCatalog(user);
+  const hSel = $('myHskSelect');
+  if (!hSel) return;
+  const prevH = hSel.value;
+  hSel.innerHTML = cat.length
+    ? cat.map((h, i) => `<option value="${i}">${h.hsk}</option>`).join('')
+    : '<option value="">(Chưa có HSK — Bấm ＋ để thêm)</option>';
+  if (prevH && hSel.querySelector(`option[value="${prevH}"]`)) hSel.value = prevH;
+  onMyHskChange();
+}
+
+function onMyHskChange() {
+  const user = getCurrentUser();
+  const cat = ensureUserPersonalCatalog(user);
+  const hIdx = parseInt($('myHskSelect')?.value || '0', 10);
+  const hObj = cat[hIdx];
+  const lSel = $('myLessonSelect');
+  if (!lSel) return;
+  if (!hObj) {
+    lSel.innerHTML = '<option value="">(Chưa có bài)</option>';
+    onMyLessonChange();
+    return;
+  }
+  const prevL = lSel.value;
+  lSel.innerHTML = (hObj.lessons || []).length
+    ? (hObj.lessons || []).map((l, i) => `<option value="${i}">${l.name}</option>`).join('')
+    : '<option value="">(Chưa có bài — Bấm ＋)</option>';
+  if (prevL && lSel.querySelector(`option[value="${prevL}"]`)) lSel.value = prevL;
+  onMyLessonChange();
+}
+
+function onMyLessonChange() {
+  const user = getCurrentUser();
+  const cat = ensureUserPersonalCatalog(user);
+  const hIdx = parseInt($('myHskSelect')?.value || '0', 10);
+  const lIdx = parseInt($('myLessonSelect')?.value || '0', 10);
+  const lObj = cat[hIdx]?.lessons?.[lIdx];
+  const tSel = $('myTextSelect');
+  if (!tSel) return;
+  if (!lObj) {
+    tSel.innerHTML = '<option value="">(Chưa có Text)</option>';
+    renderPersonalVocabList();
+    return;
+  }
+  const prevT = tSel.value;
+  tSel.innerHTML = (lObj.texts || []).length
+    ? (lObj.texts || []).map((t, i) => `<option value="${i}">${t.name} (${t.words.length} từ)</option>`).join('')
+    : '<option value="">(Chưa có Text — Bấm ＋)</option>';
+  if (prevT && tSel.querySelector(`option[value="${prevT}"]`)) tSel.value = prevT;
+  renderPersonalVocabList();
+}
+
+function getSelectedMyCatalogTextObj() {
+  const user = getCurrentUser();
+  const cat = ensureUserPersonalCatalog(user);
+  const hIdx = parseInt($('myHskSelect')?.value || '0', 10);
+  const lIdx = parseInt($('myLessonSelect')?.value || '0', 10);
+  const tIdx = parseInt($('myTextSelect')?.value || '0', 10);
+  const hObj = cat[hIdx];
+  const lObj = hObj?.lessons?.[lIdx];
+  const tObj = lObj?.texts?.[tIdx];
+  return { hObj, lObj, tObj, hIdx, lIdx, tIdx };
+}
+
+function myAddHskLevel() {
+  const name = prompt("Nhập tên cấp độ HSK mới trong kho cá nhân (VD: HSK 4, Giao tiếp):");
+  if (!name || !name.trim()) return;
+  const cat = ensureUserPersonalCatalog(getCurrentUser());
+  cat.push({
+    hsk: name.trim(),
+    lessons: [{ id: 'ml_' + Date.now(), name: 'Bài 1: Bài mở đầu', texts: [{ id: 'mt_' + Date.now(), name: 'Text 1: Từ vựng chính', words: [] }] }]
+  });
+  pushCloudState(`Thêm cấp độ cá nhân ${name.trim()}`);
+}
+
+function myAddLesson() {
+  const { hObj } = getSelectedMyCatalogTextObj();
+  if (!hObj) return;
+  const name = prompt(`Thêm Bài học mới vào ${hObj.hsk} (VD: Bài ${hObj.lessons.length + 1}: Chủ đề mới):`);
+  if (!name || !name.trim()) return;
+  hObj.lessons.push({
+    id: 'ml_' + Date.now(),
+    name: name.trim(),
+    texts: [{ id: 'mt_' + Date.now(), name: 'Text 1: Từ vựng chính', words: [] }]
+  });
+  pushCloudState(`Thêm bài cá nhân ${name.trim()}`);
+}
+
+function myAddTextSection() {
+  const { lObj } = getSelectedMyCatalogTextObj();
+  if (!lObj) return;
+  const name = prompt(`Thêm phần Text mới vào ${lObj.name} (VD: Text ${lObj.texts.length + 1}: Từ bổ sung):`);
+  if (!name || !name.trim()) return;
+  lObj.texts.push({ id: 'mt_' + Date.now(), name: name.trim(), words: [] });
+  pushCloudState(`Thêm mục Text cá nhân ${name.trim()}`);
+}
+
+function myDeleteCurrentText() {
+  const { hObj, lObj, tObj, tIdx } = getSelectedMyCatalogTextObj();
+  if (!lObj || lObj.texts.length <= 1) return alert("Mỗi bài cần giữ lại ít nhất 1 mục Text!");
+  openDeleteConfirm436({
+    title: "Xóa mục Text cá nhân này?",
+    desc: `Mục «${hObj.hsk} · ${lObj.name} · ${tObj.name}» (${tObj.words.length} từ) sẽ bị xóa khỏi kho cá nhân của bạn.`,
+    onConfirm: () => {
+      lObj.texts.splice(tIdx, 1);
+      pushCloudState("Xóa mục Text cá nhân");
+      showToast("🗑️ Đã xóa mục Text cá nhân!");
+    }
+  });
+}
+
+function exportMyCatalogTextToExcel() {
+  const { hObj, lObj, tObj } = getSelectedMyCatalogTextObj();
+  if (!tObj || typeof XLSX === 'undefined') return;
+  const rows = [["Chữ Hán", "Pinyin", "Nghĩa tiếng Việt"], ...tObj.words.map(w => [w.zh, w.pinyin, w.vi])];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "TuVungCaNhan");
+  XLSX.writeFile(wb, `CaNhan_${hObj.hsk}_${lObj.name}_${tObj.name}.xlsx`.replace(/\s+/g, '_'));
+}
+
+function renderMemberPushInboxBanner() {
+  const user = getCurrentUser();
+  const banner = $('memberPushInboxBanner');
+  if (!banner) return;
+  const log = user.pushInboxLog || [];
+  if (log.length > 0) {
+    const latest = log[0];
+    banner.style.display = 'flex';
+    $('memberPushInboxTitle').textContent = `📩 ${latest.from || 'Quản trị viên'} đã đẩy ${latest.wordCount} từ mới vào kho của bạn (${latest.at})!`;
+    $('memberPushInboxDetail').textContent = `Phạm vi nhận: ${latest.scopeLabel} · Đã tự động xếp đúng vào cây HSK ➔ Bài ➔ Text bên dưới.`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function jumpToLatestPushedMyCatalog() {
+  const user = getCurrentUser();
+  const latest = user.pushInboxLog?.[0];
+  switchMyVocabMode('catalog');
+  if (!latest) return;
+  const cat = ensureUserPersonalCatalog(user);
+  const hIdx = cat.findIndex(h => h.hsk === latest.hskName);
+  if (hIdx >= 0 && $('myHskSelect')) {
+    $('myHskSelect').value = String(hIdx);
+    onMyHskChange();
+    if (latest.lessonName) {
+      const lIdx = cat[hIdx].lessons.findIndex(l => l.name === latest.lessonName);
+      if (lIdx >= 0 && $('myLessonSelect')) {
+        $('myLessonSelect').value = String(lIdx);
+        onMyLessonChange();
+        if (latest.textName) {
+          const tIdx = cat[hIdx].lessons[lIdx].texts.findIndex(t => t.name === latest.textName);
+          if (tIdx >= 0 && $('myTextSelect')) {
+            $('myTextSelect').value = String(tIdx);
+            renderPersonalVocabList();
+          }
+        }
+      }
+    }
+  }
+}
+
 function populatePersonalSetDropdown() {
   const user = getCurrentUser();
   const sel = $('personalSetSelect');
-  if (!sel) return;
-  const prev = sel.value;
-  sel.innerHTML = (user.personalSets || []).map((s, i) => `<option value="${i}">${s.name} (${s.words.length} từ)</option>`).join('');
-  if (prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
-  renderPersonalVocabList();
+  if (sel) {
+    const prev = sel.value;
+    sel.innerHTML = (user.personalSets || []).map((s, i) => `<option value="${i}">${s.name} (${s.words.length} từ)</option>`).join('');
+    if (prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
+  }
+  renderMyCatalogSelectors();
+  renderMemberPushInboxBanner();
 }
 
 function renderPersonalVocabList() {
   const user = getCurrentUser();
+  const box = $('personalVocabContainer');
+  if (!box) return;
+
+  if (myVocabViewMode === 'catalog') {
+    const { hObj, lObj, tObj } = getSelectedMyCatalogTextObj();
+    if (!tObj) {
+      if ($('myCurrentPathLabel')) $('myCurrentPathLabel').textContent = 'Chưa có mục HSK - Bài - Text nào';
+      if ($('myAddTargetHintBadge')) $('myAddTargetHintBadge').textContent = 'Bấm ＋ ở Tầng 1 để tạo mục mới';
+      box.innerHTML = '<div style="padding:28px;text-align:center;color:var(--muted)">Kho cá nhân đang trống. Hãy bấm nút <b>＋</b> ở Tầng 1 (Cấp độ HSK) để tự tạo bài, hoặc chờ Admin đẩy từ vựng vào!</div>';
+      return;
+    }
+    const pathStr = `${hObj.hsk} ➔ ${lObj.name} ➔ ${tObj.name}`;
+    if ($('myCurrentPathLabel')) $('myCurrentPathLabel').textContent = `${pathStr} (${tObj.words.length} từ)`;
+    if ($('myAddTargetHintBadge')) $('myAddTargetHintBadge').textContent = `Lưu vào: ${pathStr}`;
+
+    box.innerHTML = tObj.words.map((w, wIdx) => `
+      <div class="vocab-row">
+        <span class="small">#${wIdx + 1}</span>
+        <strong style="font-size:20px;font-family:'KaiTi',serif">${w.zh}</strong>
+        <span class="py-col" style="color:var(--primary);font-weight:600">${w.pinyin || '—'}</span>
+        <span>${w.vi}</span>
+        <div style="display:flex;gap:4px">
+          <button class="speaker-btn" onclick="speakChinese('${w.zh}')">🔊</button>
+          <button class="danger" style="padding:4px 8px;font-size:12px" onclick="deleteMyCatalogWord(${wIdx})">✕</button>
+        </div>
+      </div>
+    `).join('') || '<div style="padding:24px;text-align:center;color:var(--muted)">Mục Text này chưa có từ nào. Hãy nhập chữ Hán, dùng Trợ lý AI hoặc chờ Admin đẩy từ vựng vào!</div>';
+    return;
+  }
+
   const idx = parseInt($('personalSetSelect')?.value || '0', 10);
   const pSet = user.personalSets?.[idx];
-  const box = $('personalVocabContainer');
-  if (!box || !pSet) return;
+  if (!pSet) return;
+  if ($('myAddTargetHintBadge')) $('myAddTargetHintBadge').textContent = `Lưu vào bộ: ${pSet.name}`;
 
   box.innerHTML = pSet.words.map((w, wIdx) => `
     <div class="vocab-row">
@@ -4645,11 +6107,19 @@ function renderPersonalVocabList() {
   `).join('') || '<div style="padding:24px;text-align:center;color:var(--muted)">Bộ từ cá nhân này chưa có từ nào. Hãy nhập chữ Hán hoặc tải file Excel/Word để AI tự xử lý!</div>';
 }
 
+function deleteMyCatalogWord(wIdx) {
+  const { tObj } = getSelectedMyCatalogTextObj();
+  if (!tObj) return;
+  tObj.words.splice(wIdx, 1);
+  pushCloudState("Xóa từ trong mục HSK cá nhân");
+}
+
 function createPersonalSetPrompt() {
   const name = prompt("Nhập tên bộ từ vựng cá nhân mới (VD: Từ vựng phỏng vấn, HSK 4 tự học):");
   if (!name || !name.trim()) return;
   const user = getCurrentUser();
   user.personalSets.unshift({ id: 'pset_' + Date.now(), name: name.trim(), words: [] });
+  switchMyVocabMode('sets');
   pushCloudState(`Tạo bộ từ cá nhân: ${name.trim()}`);
 }
 
@@ -4683,10 +6153,18 @@ async function addWordToPersonalSet() {
   }
 
   const user = getCurrentUser();
-  const idx = parseInt($('personalSetSelect').value || '0', 10);
-  user.personalSets[idx].words.unshift({ id: 'pw_' + Date.now(), zh, pinyin, vi });
-  $('myNewZh').value = ''; $('myNewPy').value = ''; $('myNewVi').value = '';
-  pushCloudState(`Thêm từ cá nhân: ${zh}`);
+  if (myVocabViewMode === 'catalog') {
+    const { hObj, lObj, tObj } = getSelectedMyCatalogTextObj();
+    if (!tObj) return alert("Vui lòng chọn mục HSK - Bài - Text!");
+    tObj.words.unshift({ id: 'mpw_' + Date.now(), zh, pinyin, vi });
+    $('myNewZh').value = ''; $('myNewPy').value = ''; $('myNewVi').value = '';
+    pushCloudState(`Thêm từ cá nhân "${zh}" vào ${hObj.hsk} · ${lObj.name}`);
+  } else {
+    const idx = parseInt($('personalSetSelect').value || '0', 10);
+    user.personalSets[idx].words.unshift({ id: 'pw_' + Date.now(), zh, pinyin, vi });
+    $('myNewZh').value = ''; $('myNewPy').value = ''; $('myNewVi').value = '';
+    pushCloudState(`Thêm từ cá nhân: ${zh}`);
+  }
 }
 
 function deletePersonalWord(setIdx, wordIdx) {
@@ -4696,6 +6174,13 @@ function deletePersonalWord(setIdx, wordIdx) {
 }
 
 function testPersonalSet() {
+  if (myVocabViewMode === 'catalog') {
+    const { hObj, lObj, tObj } = getSelectedMyCatalogTextObj();
+    if (!tObj || !tObj.words.length) return alert("Mục HSK - Bài - Text này chưa có từ vựng!");
+    switchTab('tab-test');
+    launchTestWithWords([...tObj.words], `Cá nhân · ${hObj.hsk} · ${lObj.name} · ${tObj.name}`, 0, 0);
+    return;
+  }
   const user = getCurrentUser();
   const idx = parseInt($('personalSetSelect').value || '0', 10);
   const pSet = user.personalSets[idx];
@@ -4705,13 +6190,19 @@ function testPersonalSet() {
 }
 
 function sendPersonalSetToWrongCopybook() {
-  const user = getCurrentUser();
-  const idx = parseInt($('personalSetSelect').value || '0', 10);
-  const pSet = user.personalSets[idx];
-  if (!pSet || !pSet.words.length) return alert("Bộ từ này chưa có từ vựng!");
-  pSet.words.forEach(w => addWordToWrongMemory(w, false));
+  let words = [];
+  if (myVocabViewMode === 'catalog') {
+    const { tObj } = getSelectedMyCatalogTextObj();
+    words = tObj?.words || [];
+  } else {
+    const user = getCurrentUser();
+    const idx = parseInt($('personalSetSelect').value || '0', 10);
+    words = user.personalSets?.[idx]?.words || [];
+  }
+  if (!words.length) return alert("Mục này chưa có từ vựng!");
+  words.forEach(w => addWordToWrongMemory(w, false));
   switchTab('tab-copybook');
-  showToast(`✍️ Đã đưa ${pSet.words.length} từ sang phiếu Chép cho nhớ (2 dòng)!`);
+  showToast(`✍️ Đã đưa ${words.length} từ sang phiếu Chép cho nhớ (2 dòng)!`);
 }
 
 function renderProgressHistory() {
@@ -4751,7 +6242,9 @@ function renderAdminSelectors() {
   const hSel = $('admHskSelect');
   if (!hSel) return;
   const prevH = hSel.value;
-  hSel.innerHTML = appState.adminCatalog.map((h, i) => `<option value="${i}">${h.hsk}</option>`).join('');
+  hSel.innerHTML = appState.adminCatalog.length
+    ? appState.adminCatalog.map((h, i) => `<option value="${i}">${h.hsk}</option>`).join('')
+    : '<option value="">(Chưa có HSK — Bấm ＋ để tạo)</option>';
   if (prevH && hSel.querySelector(`option[value="${prevH}"]`)) hSel.value = prevH;
   onAdmHskChange();
 }
@@ -4760,9 +6253,16 @@ function onAdmHskChange() {
   const hIdx = parseInt($('admHskSelect').value || '0', 10);
   const hObj = appState.adminCatalog[hIdx];
   const lSel = $('admLessonSelect');
-  if (!hObj || !lSel) return;
+  if (!lSel) return;
+  if (!hObj) {
+    lSel.innerHTML = '<option value="">(Chưa có Bài)</option>';
+    onAdmLessonChange();
+    return;
+  }
   const prevL = lSel.value;
-  lSel.innerHTML = hObj.lessons.map((l, i) => `<option value="${i}">${l.name}</option>`).join('');
+  lSel.innerHTML = (hObj.lessons || []).length
+    ? hObj.lessons.map((l, i) => `<option value="${i}">${l.name}</option>`).join('')
+    : '<option value="">(Chưa có Bài — Bấm ＋)</option>';
   if (prevL && lSel.querySelector(`option[value="${prevL}"]`)) lSel.value = prevL;
   onAdmLessonChange();
 }
@@ -4770,29 +6270,42 @@ function onAdmHskChange() {
 function onAdmLessonChange() {
   const hIdx = parseInt($('admHskSelect').value || '0', 10);
   const lIdx = parseInt($('admLessonSelect').value || '0', 10);
-  const lObj = appState.adminCatalog[hIdx]?.lessons[lIdx];
+  const lObj = appState.adminCatalog[hIdx]?.lessons?.[lIdx];
   const tSel = $('admTextSelect');
-  if (!lObj || !tSel) return;
+  if (!tSel) return;
+  if (!lObj) {
+    tSel.innerHTML = '<option value="">(Chưa có Text)</option>';
+    renderAdminVocabTable();
+    return;
+  }
   const prevT = tSel.value;
-  tSel.innerHTML = lObj.texts.map((t, i) => `<option value="${i}">${t.name} (${t.words.length} từ)</option>`).join('');
+  tSel.innerHTML = (lObj.texts || []).length
+    ? lObj.texts.map((t, i) => `<option value="${i}">${t.name} (${t.words.length} từ)</option>`).join('')
+    : '<option value="">(Chưa có Text — Bấm ＋)</option>';
   if (prevT && tSel.querySelector(`option[value="${prevT}"]`)) tSel.value = prevT;
   renderAdminVocabTable();
 }
 
 function getSelectedAdminTextObj() {
-  const hIdx = parseInt($('admHskSelect').value || '0', 10);
-  const lIdx = parseInt($('admLessonSelect').value || '0', 10);
-  const tIdx = parseInt($('admTextSelect').value || '0', 10);
+  const hIdx = parseInt($('admHskSelect')?.value || '0', 10);
+  const lIdx = parseInt($('admLessonSelect')?.value || '0', 10);
+  const tIdx = parseInt($('admTextSelect')?.value || '0', 10);
   const hObj = appState.adminCatalog[hIdx];
-  const lObj = hObj?.lessons[lIdx];
-  const tObj = lObj?.texts[tIdx];
-  return { hObj, lObj, tObj, tIdx };
+  const lObj = hObj?.lessons?.[lIdx];
+  const tObj = lObj?.texts?.[tIdx];
+  return { hObj, lObj, tObj, hIdx, lIdx, tIdx };
 }
 
 function renderAdminVocabTable() {
   const { hObj, lObj, tObj } = getSelectedAdminTextObj();
   const box = $('adminVocabTable');
-  if (!box || !tObj) return;
+  if (!box) return;
+  if (!tObj) {
+    if ($('admCurrentPathLabel')) $('admCurrentPathLabel').textContent = 'Kho đang trống — Bấm ＋ ở Tầng 1 (HSK) để tự tạo mục mới';
+    box.innerHTML = '<div style="padding:28px;text-align:center;color:var(--muted)">Kho Admin hiện đang sạch (0 từ, 0 text mẫu). Hãy bấm nút <b>＋</b> ở <b>Tầng 1: Cấp độ HSK</b> để tạo HSK - Bài - Text của bạn và bắt đầu đẩy từ vựng lên!</div>';
+    if (typeof renderAdminPushMembersList === 'function') renderAdminPushMembersList();
+    return;
+  }
   $('admCurrentPathLabel').textContent = `${hObj.hsk} ➔ ${lObj.name} ➔ ${tObj.name} (${tObj.words.length} từ)`;
 
   box.innerHTML = tObj.words.map((w, idx) => `
@@ -4807,10 +6320,232 @@ function renderAdminVocabTable() {
       </div>
     </div>
   `).join('') || '<div style="padding:20px;text-align:center;color:var(--muted)">Mục Text này chưa có từ vựng nào.</div>';
+  if (typeof renderAdminPushMembersList === 'function') renderAdminPushMembersList();
+}
+
+// ==================== ĐẨY TỪ VỰNG VÀO KHO CỦA THÀNH VIÊN (ADMIN -> MEMBER CATALOG) ====================
+function getAdminPushItemsByScope(scope) {
+  const hIdx = parseInt($('admHskSelect')?.value || '0', 10);
+  const lIdx = parseInt($('admLessonSelect')?.value || '0', 10);
+  const tIdx = parseInt($('admTextSelect')?.value || '0', 10);
+  const items = [];
+  let scopeLabel = '';
+  let targetMeta = { hskName: '', lessonName: '', textName: '' };
+
+  if (scope === 'text') {
+    const hObj = appState.adminCatalog[hIdx];
+    const lObj = hObj?.lessons?.[lIdx];
+    const tObj = lObj?.texts?.[tIdx];
+    if (hObj && lObj && tObj) {
+      items.push({ hskName: hObj.hsk, lessonId: lObj.id, lessonName: lObj.name, textId: tObj.id, textName: tObj.name, words: tObj.words || [] });
+      scopeLabel = `${hObj.hsk} ➔ ${lObj.name} ➔ ${tObj.name}`;
+      targetMeta = { hskName: hObj.hsk, lessonName: lObj.name, textName: tObj.name };
+    }
+  } else if (scope === 'lesson') {
+    const hObj = appState.adminCatalog[hIdx];
+    const lObj = hObj?.lessons?.[lIdx];
+    if (hObj && lObj) {
+      (lObj.texts || []).forEach(tObj => {
+        items.push({ hskName: hObj.hsk, lessonId: lObj.id, lessonName: lObj.name, textId: tObj.id, textName: tObj.name, words: tObj.words || [] });
+      });
+      scopeLabel = `${hObj.hsk} ➔ ${lObj.name} (Toàn bộ ${lObj.texts.length} Text)`;
+      targetMeta = { hskName: hObj.hsk, lessonName: lObj.name, textName: lObj.texts?.[0]?.name || '' };
+    }
+  } else if (scope === 'hsk') {
+    const hObj = appState.adminCatalog[hIdx];
+    if (hObj) {
+      (hObj.lessons || []).forEach(lObj => {
+        (lObj.texts || []).forEach(tObj => {
+          items.push({ hskName: hObj.hsk, lessonId: lObj.id, lessonName: lObj.name, textId: tObj.id, textName: tObj.name, words: tObj.words || [] });
+        });
+      });
+      scopeLabel = `Toàn bộ ${hObj.hsk} (${hObj.lessons.length} bài)`;
+      targetMeta = { hskName: hObj.hsk, lessonName: hObj.lessons?.[0]?.name || '', textName: '' };
+    }
+  } else {
+    (appState.adminCatalog || []).forEach(hObj => {
+      (hObj.lessons || []).forEach(lObj => {
+        (lObj.texts || []).forEach(tObj => {
+          items.push({ hskName: hObj.hsk, lessonId: lObj.id, lessonName: lObj.name, textId: tObj.id, textName: tObj.name, words: tObj.words || [] });
+        });
+      });
+    });
+    scopeLabel = `Toàn bộ Kho HSK hệ thống (${appState.adminCatalog.length} cấp độ)`;
+    targetMeta = { hskName: appState.adminCatalog?.[0]?.hsk || '', lessonName: '', textName: '' };
+  }
+
+  const totalWords = items.reduce((acc, it) => acc + (it.words?.length || 0), 0);
+  return { items, totalWords, scopeLabel, targetMeta, hIdx, lIdx, tIdx };
+}
+
+function renderAdminPushMembersList() {
+  const box = $('admPushMembersList');
+  if (!box) return;
+
+  // Giữ lại các uid đang được tick trước khi render lại
+  const prevChecked = new Set(
+    Array.from(box.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value)
+  );
+  const hadRendered = box.dataset.rendered === '1';
+
+  const allUsers = Object.values(appState.users || {});
+  const members = allUsers.filter(u => u.uid !== SYSTEM_ADMIN_CRED.uid);
+
+  box.innerHTML = members.map(u => {
+    const isChecked = hadRendered ? prevChecked.has(u.uid) : true;
+    const catCount = countWordsInUserPersonalCatalog(u);
+    const isAdm = u.role === 'admin';
+    return `
+      <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);cursor:pointer;font-size:12.5px">
+        <span style="display:inline-flex;align-items:center;gap:6px;min-width:0">
+          <input type="checkbox" class="adm-push-member-chk" value="${u.uid}" ${isChecked ? 'checked' : ''} onchange="updateAdminPushSelectedCount()">
+          <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${isAdm ? '🛡️' : '👤'} ${u.name}</strong>
+          <span class="small" style="font-size:11px">(${u.email || u.uid})</span>
+        </span>
+        <span class="badge default" style="flex-shrink:0">${catCount} từ</span>
+      </label>
+    `;
+  }).join('') || '<div class="small" style="padding:8px;color:var(--muted)">Chưa có thành viên nào đăng ký. Bạn có thể nhập Email bên dưới để đẩy trước!</div>';
+
+  box.dataset.rendered = '1';
+  updateAdminPushSelectedCount();
+  updateAdminPushPreview();
+}
+
+function toggleAllPushMembers(checked) {
+  document.querySelectorAll('.adm-push-member-chk').forEach(chk => { chk.checked = checked; });
+  updateAdminPushSelectedCount();
+}
+
+function updateAdminPushSelectedCount() {
+  const count = document.querySelectorAll('.adm-push-member-chk:checked').length;
+  if ($('admSelectedMemberCount')) $('admSelectedMemberCount').textContent = count;
+}
+
+function updateAdminPushPreview() {
+  const scope = $('admPushScopeSelect')?.value || 'text';
+  const info = getAdminPushItemsByScope(scope);
+  if ($('admPushScopeDetail')) {
+    $('admPushScopeDetail').textContent = `Đang chọn: ${info.scopeLabel} (${info.totalWords} từ vựng)`;
+  }
+  if ($('admPushPreviewBadge')) {
+    $('admPushPreviewBadge').textContent = `${info.totalWords} từ sẵn sàng đẩy`;
+  }
+}
+
+async function adminPushVocabToMembers() {
+  const scope = $('admPushScopeSelect')?.value || 'text';
+  const info = getAdminPushItemsByScope(scope);
+  if (!info.items.length || info.totalWords === 0) {
+    return alert("Mục từ vựng bạn chọn hiện chưa có từ nào để đẩy!");
+  }
+
+  const selectedUids = Array.from(document.querySelectorAll('.adm-push-member-chk:checked')).map(el => el.value);
+  const customEmailRaw = ($('admPushCustomEmail')?.value || '').trim().toLowerCase();
+
+  if (customEmailRaw) {
+    const customUid = 'email_' + customEmailRaw.replace(/[^a-z0-9]/g, '_');
+    if (!appState.users[customUid]) {
+      const dispName = customEmailRaw.includes('@') ? customEmailRaw.split('@')[0] : customEmailRaw;
+      appState.users[customUid] = {
+        uid: customUid,
+        name: dispName,
+        email: customEmailRaw,
+        provider: 'email',
+        role: 'student',
+        totalScore: 0,
+        wrongWords: [],
+        personalSets: [{ id: 'pset_' + Date.now(), name: 'Từ vựng ôn tập riêng', words: [] }],
+        personalCatalog: [],
+        pushInboxLog: [],
+        history: [],
+        resumeSession: null,
+        updatedAt: Date.now()
+      };
+    }
+    if (!selectedUids.includes(customUid)) selectedUids.push(customUid);
+  }
+
+  if (!selectedUids.length) {
+    return alert("Vui lòng chọn ít nhất 1 thành viên (hoặc nhập Email thành viên) để đẩy từ vựng!");
+  }
+
+  const btn = $('btnAdminPushToMembers');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang đẩy vào kho thành viên...'; }
+
+  try {
+    await pullCloudState(true).catch(() => {});
+    const nowStr = new Date().toLocaleString('vi-VN');
+    const senderName = getCurrentUser().name;
+    const pushedNames = [];
+    const targetVer = (appState.version || 1) + 1;
+
+    selectedUids.forEach(uid => {
+      const u = appState.users[uid];
+      if (!u) return;
+      mergeCatalogItemsIntoUser(u, info.items);
+      syncAdminWordsToUserProfile(u);
+      u.pushInboxLog = Array.isArray(u.pushInboxLog) ? u.pushInboxLog : [];
+      u.pushInboxLog.unshift({
+        from: senderName,
+        scopeLabel: info.scopeLabel,
+        hskName: info.targetMeta.hskName,
+        lessonName: info.targetMeta.lessonName,
+        textName: info.targetMeta.textName,
+        wordCount: info.totalWords,
+        at: nowStr
+      });
+      u.pushInboxLog = u.pushInboxLog.slice(0, 10);
+      u.updatedAt = Date.now();
+
+      appState.accountUpdateReceipts[u.uid] = {
+        uid: u.uid,
+        name: u.name,
+        email: u.email || u.uid,
+        role: (u.role === 'admin' || u.uid === SYSTEM_ADMIN_CRED.uid) ? 'Quản trị viên' : 'Học viên',
+        syncedVersion: targetVer,
+        syncedAt: nowStr,
+        totalSyncedWords: countWordsInUserPersonalCatalog(u)
+      };
+      pushedNames.push(u.name);
+    });
+
+    if ($('admPushAutoExamChk')?.checked && scope === 'text') {
+      registerAdminGeneratedExam(info.hIdx, info.lIdx, info.tIdx, info.totalWords);
+    } else {
+      appState.catalogRevision = (appState.catalogRevision || 1) + 1;
+      appState.catalogUpdatedAt = Date.now();
+      appState.lastSystemUpdate = {
+        version: targetVer,
+        catalogRevision: appState.catalogRevision,
+        pathLabel: info.scopeLabel,
+        examTitle: `Admin đẩy từ vựng: ${info.scopeLabel}`,
+        addedWordsCount: info.totalWords,
+        totalLessonWords: info.totalWords,
+        totalCatalogWords: getAllAdminWordsCount(),
+        updatedBy: senderName,
+        updatedAt: nowStr,
+        dismissed: false
+      };
+    }
+
+    if ($('admPushCustomEmail')) $('admPushCustomEmail').value = '';
+    await pushCloudState(`Admin đẩy ${info.totalWords} từ (${info.scopeLabel}) vào kho của ${pushedNames.length} thành viên`);
+
+    const notice = $('adminExamCreatedNotice');
+    if (notice) {
+      notice.style.display = 'flex';
+      $('adminExamCreatedText').textContent = `🚀 Đã đẩy ${info.totalWords} từ (${info.scopeLabel}) vào đúng mục HSK-Bài-Text của ${pushedNames.length} thành viên!`;
+      $('adminExamCreatedSub').textContent = `📋 Thành viên đã nhận: ${pushedNames.join(', ')}`;
+    }
+    showToast(`🚀 Đã đẩy ${info.totalWords} từ vào kho HSK-Bài-Text của ${pushedNames.length} thành viên (${pushedNames.join(', ')})!`);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Đẩy từ vựng vào kho thành viên đã chọn'; }
+  }
 }
 
 function admAddHskLevel() {
-  const name = prompt("Nhập tên cấp độ HSK mới (VD: HSK 4, HSK 5, HSK 7-9):");
+  const name = prompt("Nhập tên cấp độ HSK mới (VD: HSK 1, HSK 2, HSK 3...):");
   if (!name || !name.trim()) return;
   appState.adminCatalog.push({
     hsk: name.trim(),
@@ -4850,7 +6585,7 @@ function admAddTextSection() {
 
 function admDeleteCurrentText() {
   const { hObj, lObj, tObj, tIdx } = getSelectedAdminTextObj();
-  if (!lObj || lObj.texts.length <= 1) return alert("Mỗi bài cần giữ lại ít nhất 1 mục Text!");
+  if (!lObj || !tObj) return alert("Chưa có mục Text nào để xóa!");
   openDeleteConfirm436({
     title: "Xóa mục Text khỏi hệ thống?",
     desc: `Mục «${hObj.hsk} · ${lObj.name} · ${tObj.name}» (${tObj.words.length} từ) sẽ bị xóa vĩnh viễn.`,
@@ -4858,8 +6593,66 @@ function admDeleteCurrentText() {
       lObj.texts.splice(tIdx, 1);
       appState.catalogRevision = (appState.catalogRevision || 1) + 1;
       appState.catalogUpdatedAt = Date.now();
-      pushCloudState("Admin xóa mục Text");
+      syncAdminVocabToAllAccounts();
+      pushCloudState("Admin xóa mục Text (đồng bộ 2 kho)");
       showToast("🗑️ Đã xóa mục Text khỏi hệ thống!");
+    }
+  });
+}
+
+function admDeleteCurrentLesson() {
+  const { hObj, lObj, lIdx } = getSelectedAdminTextObj();
+  if (!hObj || !lObj) return alert("Chưa có Bài học nào để xóa!");
+  openDeleteConfirm436({
+    title: "Xóa Bài học này?",
+    desc: `Toàn bộ mục Text và từ vựng trong «${hObj.hsk} · ${lObj.name}» sẽ bị xóa vĩnh viễn.`,
+    onConfirm: () => {
+      hObj.lessons.splice(lIdx, 1);
+      appState.catalogRevision = (appState.catalogRevision || 1) + 1;
+      appState.catalogUpdatedAt = Date.now();
+      syncAdminVocabToAllAccounts();
+      pushCloudState(`Admin xóa bài: ${lObj.name}`);
+      showToast(`🗑️ Đã xóa bài "${lObj.name}"!`);
+    }
+  });
+}
+
+function admDeleteCurrentHsk() {
+  const { hObj, hIdx } = getSelectedAdminTextObj();
+  if (!hObj) return alert("Chưa có cấp độ HSK nào để xóa!");
+  openDeleteConfirm436({
+    title: `Xóa toàn bộ cấp độ «${hObj.hsk}»?`,
+    desc: `Tất cả ${hObj.lessons.length} bài học trong «${hObj.hsk}» sẽ bị xóa vĩnh viễn.`,
+    onConfirm: () => {
+      appState.adminCatalog.splice(hIdx, 1);
+      appState.catalogRevision = (appState.catalogRevision || 1) + 1;
+      appState.catalogUpdatedAt = Date.now();
+      syncAdminVocabToAllAccounts();
+      pushCloudState(`Admin xóa cấp độ: ${hObj.hsk}`);
+      showToast(`🗑️ Đã xóa cấp độ "${hObj.hsk}"!`);
+    }
+  });
+}
+
+function admClearAllCatalogAndTests() {
+  openDeleteConfirm436({
+    title: "Xóa sạch toàn bộ Kho HSK & Đề Test?",
+    desc: "Toàn bộ các cấp độ HSK, Bài, Text và danh sách đề Test sẽ được xóa sạch để bạn đẩy dữ liệu mới từ đầu.",
+    onConfirm: () => {
+      appState.adminCatalog = [];
+      appState.generatedTests = [];
+      appState.lastSystemUpdate = null;
+      appState.catalogRevision = (appState.catalogRevision || 1) + 1;
+      appState.testsRevision = (appState.testsRevision || 1) + 1;
+      appState.catalogUpdatedAt = Date.now();
+      Object.values(appState.users || {}).forEach(u => {
+        u.personalCatalog = [];
+        syncAdminWordsToUserProfile(u);
+      });
+      testSession = { title: "", words: [], currentIndex: 0, score: 0, wrongCount: 0, answeredMap: {} };
+      renderCurrentTestQuestion();
+      pushCloudState("Admin xóa sạch toàn bộ kho & đề Test");
+      showToast("🧹 Đã xóa sạch toàn bộ kho HSK và danh sách đề Test!");
     }
   });
 }
@@ -4879,25 +6672,40 @@ async function admAddSingleWord() {
     if (btn) { btn.disabled = false; btn.textContent = '✨ Lưu từ'; }
   }
 
-  const hIdx = parseInt($('admHskSelect').value || '0', 10);
-  const lIdx = parseInt($('admLessonSelect').value || '0', 10);
-  const tIdx = parseInt($('admTextSelect').value || '0', 10);
-  const { tObj } = getSelectedAdminTextObj();
+  await pullCloudState(true).catch(() => {});
+  if (!appState.adminCatalog.length) {
+    appState.adminCatalog.push({
+      hsk: 'HSK 1',
+      lessons: [{ id: 'l_' + Date.now(), name: 'Bài 1', texts: [{ id: 't_' + Date.now(), name: 'Text 1', words: [] }] }]
+    });
+    renderAdminSelectors();
+  }
+  let { hObj, lObj, tObj, hIdx, lIdx, tIdx } = getSelectedAdminTextObj();
+  if (hObj && !lObj) {
+    hObj.lessons.push({ id: 'l_' + Date.now(), name: 'Bài 1', texts: [{ id: 't_' + Date.now(), name: 'Text 1', words: [] }] });
+    renderAdminSelectors();
+    ({ hObj, lObj, tObj, hIdx, lIdx, tIdx } = getSelectedAdminTextObj());
+  }
+  if (lObj && !tObj) {
+    lObj.texts.push({ id: 't_' + Date.now(), name: 'Text 1', words: [] });
+    renderAdminSelectors();
+    ({ hObj, lObj, tObj, hIdx, lIdx, tIdx } = getSelectedAdminTextObj());
+  }
   tObj.words.push({ id: 'aw_' + Date.now(), zh, pinyin, vi });
   $('admZh').value = ''; $('admPy').value = ''; $('admVi').value = '';
   appState.catalogUpdatedAt = Date.now();
 
   const createdExam = registerAdminGeneratedExam(hIdx, lIdx, tIdx, 1);
   const updatedNames = Object.values(appState.accountUpdateReceipts || {}).map(r => r.name).join(', ');
-  pushCloudState(`Admin thêm từ "${zh}" & cập nhật đề "${createdExam?.title || tObj.name}"`);
+  await pushCloudState(`Admin thêm đồng thời "${zh}" vào Kho Admin & Học viên`);
 
   const notice = $('adminExamCreatedNotice');
   if (notice && createdExam) {
     notice.style.display = 'flex';
-    $('adminExamCreatedText').textContent = `✅ Đã tạo/cập nhật "${createdExam.title}" & tự động nhập "${zh}" vào kho Thành viên / Quản trị viên!`;
-    $('adminExamCreatedSub').textContent = `📋 Tài khoản đã cập nhật trên hệ thống: ${updatedNames}`;
+    $('adminExamCreatedText').textContent = `✅ Đã thêm "${zh}" cùng lúc vào Kho Admin & Kho Học viên và cập nhật "${createdExam.title}"!`;
+    $('adminExamCreatedSub').textContent = `📋 Tài khoản đã cập nhật đồng thời: ${updatedNames}`;
   }
-  showToast(`🌐 Đã lưu "${zh}", tạo đề kiểm tra & cập nhật cho ${Object.keys(appState.accountUpdateReceipts).length} tài khoản!`);
+  showToast(`⚡ Đã thêm "${zh}" vào Kho Admin & Kho Học viên cùng lúc!`);
 }
 
 function admDeleteWord(wIdx) {
@@ -4905,7 +6713,8 @@ function admDeleteWord(wIdx) {
   tObj.words.splice(wIdx, 1);
   appState.catalogRevision = (appState.catalogRevision || 1) + 1;
   appState.catalogUpdatedAt = Date.now();
-  pushCloudState("Admin xóa từ vựng");
+  syncAdminVocabToAllAccounts();
+  pushCloudState("Admin xóa từ vựng (đồng bộ 2 kho)");
 }
 
 function exportAdminTextToExcel() {
@@ -6156,11 +7965,13 @@ function closeDeleteConfirm436() {
 })();
 
 // ==================== KHỞI CHẠY HỆ THỐNG ====================
+if ($('firebaseDbUrlInput')) $('firebaseDbUrlInput').value = firebaseDbUrl;
 detectPlatformLabel();
+switchMyVocabMode('catalog');
 refreshAllUI();
-startSelectedTest();
+startSelectedTest(true);
 startRealtimePushListener();
-pullCloudState(true);
+pullCloudState(true, true);
 bind4DToolbars();
 </script>
 </body>
